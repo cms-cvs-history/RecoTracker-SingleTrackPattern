@@ -1,0 +1,10 @@
+before cmsRunning  CosmicDigi.cfg
+1)  download IOMC/CosmicMuonGenerator 
+2)  modify the lines of 	IOMC/CosmicMuonGenerator/interface
+   const double RadiusCMS =  8000.; // [mm]
+  const double Z_DistCMS = 15000.; // [mm]	
+in 
+  const double RadiusCMS =  1100.; // [mm]
+  const double Z_DistCMS = 1100.; // [mm]
+3) compile
+
