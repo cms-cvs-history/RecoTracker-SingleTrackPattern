@@ -39,8 +39,12 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
   using namespace edm;
   std::cout<<"EV "<<e.id()<<std::endl; 
   // Step A: Get Inputs 
-  edm::Handle<reco::TrackCollection> coll;
-  e.getByType(coll);
+  
+  edm::Handle<reco::TrackCollection> trackCollection;
+  //    event.getByLabel("trackp", trackCollection);
+  e.getByType(trackCollection);
+  
+  const reco::TrackCollection tC = *(trackCollection.product());
   //
   theStripHits.clear();
   edm::Handle<edm::PSimHitContainer> TOBHitsLowTof;
@@ -55,17 +59,17 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
   edm::ESHandle<TrackerGeometry> tracker;
   es.get<TrackerDigiGeometryRecord>().get(tracker);
   //  reco::TrackCollection::iterator itr;
-  reco::TrackCollection::const_iterator itr;
-  const   reco::TrackCollection *tracks=coll.product();
-  reco::TrackCollection::const_iterator ibeg=tracks->begin();
-  reco::TrackCollection::const_iterator iend=tracks->end();
-    //  reco::track_iterator ibeg=tracks->begin();
-  //  reco::track_iterator ibeg2=coll.begin();
-  //  std::cout <<" FOUND "<<(coll.product())->size()<<" Seeds."<<std::endl;
+  // reco::TrackCollection::const_iterator itr;
+//   const   reco::TrackCollection *tracks=coll.product();
+//   reco::TrackCollection::const_iterator ibeg=tracks->begin();
+//   reco::TrackCollection::const_iterator iend=tracks->end();
+//     //  reco::track_iterator ibeg=tracks->begin();
+//   //  reco::track_iterator ibeg2=coll.begin();
+//   //  std::cout <<" FOUND "<<(coll.product())->size()<<" Seeds."<<std::endl;
 
-  for (itr=ibeg;itr!=iend;itr++){
-    std::cout<<"pippo "<<(*itr).outerMomentum()<<std::endl;
-  }
+//   for (itr=ibeg;itr!=iend;itr++){
+//     std::cout<<"pippo "<<(*itr).outerMomentum()<<std::endl;
+//   }
 
   std::vector<PSimHit>::iterator ihit;
   std::cout<<std::endl<<std::endl<<"EVENTO "<<e.id()<<std::endl;
