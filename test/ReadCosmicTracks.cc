@@ -44,7 +44,7 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
   //    event.getByLabel("trackp", trackCollection);
   e.getByType(trackCollection);
   
-  const reco::TrackCollection tC = *(trackCollection.product());
+  //  const reco::TrackCollection tC = *(trackCollection.product());
   //
   theStripHits.clear();
   edm::Handle<edm::PSimHitContainer> TOBHitsLowTof;
@@ -58,21 +58,21 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
  
   edm::ESHandle<TrackerGeometry> tracker;
   es.get<TrackerDigiGeometryRecord>().get(tracker);
-  //  reco::TrackCollection::iterator itr;
-  // reco::TrackCollection::const_iterator itr;
-//   const   reco::TrackCollection *tracks=coll.product();
-//   reco::TrackCollection::const_iterator ibeg=tracks->begin();
-//   reco::TrackCollection::const_iterator iend=tracks->end();
+   reco::TrackCollection::const_iterator itr;
+   const   reco::TrackCollection *tracks=trackCollection.product();
+   reco::TrackCollection::const_iterator ibeg=tracks->begin();
+   reco::TrackCollection::const_iterator iend=tracks->end();
 //     //  reco::track_iterator ibeg=tracks->begin();
 //   //  reco::track_iterator ibeg2=coll.begin();
 //   //  std::cout <<" FOUND "<<(coll.product())->size()<<" Seeds."<<std::endl;
 
-//   for (itr=ibeg;itr!=iend;itr++){
-//     std::cout<<"pippo "<<(*itr).outerMomentum()<<std::endl;
-//   }
+  for (itr=ibeg;itr!=iend;itr++){
+  std::cout<<std::endl<<std::endl<<"EVENT ANAL "<<e.id()<<std::endl;
+  std::cout<<"Mom of the track "<<(*itr).outerMomentum()<<std::endl;
+  }
 
   std::vector<PSimHit>::iterator ihit;
-  std::cout<<std::endl<<std::endl<<"EVENTO "<<e.id()<<std::endl;
+
   float ymin=-1000;
   PSimHit isim;
   DetId idet;
@@ -93,5 +93,6 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
    //   LocalVector loc=isim.localDirection();
    GlobalVector gv= tracker->idToDet(idet)->surface().toGlobal(isim.localDirection());
    float PP=isim.pabs();
-   std::cout<<max<<" max "<<gv*PP<<std::endl;	
+   if (tracks->size()>0)
+     std::cout<<max<<" max "<<gv*PP<<std::endl;	
 }
