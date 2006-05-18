@@ -49,12 +49,17 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
   theStripHits.clear();
   edm::Handle<edm::PSimHitContainer> TOBHitsLowTof;
   edm::Handle<edm::PSimHitContainer> TOBHitsHighTof;
+  edm::Handle<edm::PSimHitContainer> TIBHitsLowTof;
+  edm::Handle<edm::PSimHitContainer> TIBHitsHighTof;
   //
   e.getByLabel("SimG4Object","TrackerHitsTOBLowTof", TOBHitsLowTof);
   e.getByLabel("SimG4Object","TrackerHitsTOBHighTof", TOBHitsHighTof);
+  e.getByLabel("SimG4Object","TrackerHitsTIBLowTof", TIBHitsLowTof);
+  e.getByLabel("SimG4Object","TrackerHitsTIBHighTof", TIBHitsHighTof);
   theStripHits.insert(theStripHits.end(), TOBHitsLowTof->begin(), TOBHitsLowTof->end());
   theStripHits.insert(theStripHits.end(), TOBHitsHighTof->begin(), TOBHitsHighTof->end());
-
+  theStripHits.insert(theStripHits.end(), TIBHitsLowTof->begin(), TIBHitsLowTof->end());
+  theStripHits.insert(theStripHits.end(), TIBHitsHighTof->begin(), TIBHitsHighTof->end());
  
   edm::ESHandle<TrackerGeometry> tracker;
   es.get<TrackerDigiGeometryRecord>().get(tracker);
@@ -67,8 +72,8 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
 //   //  std::cout <<" FOUND "<<(coll.product())->size()<<" Seeds."<<std::endl;
 
   for (itr=ibeg;itr!=iend;itr++){
-  std::cout<<std::endl<<std::endl<<"EVENT ANAL "<<e.id()<<std::endl;
-  std::cout<<"Mom of the track "<<(*itr).outerMomentum()<<std::endl;
+    //  std::cout<<std::endl<<std::endl<<"EVENT ANAL "<<e.id()<<std::endl;
+    //  std::cout<<"Mom of the track "<<(*itr).outerMomentum()<<std::endl;
   }
 
   std::vector<PSimHit>::iterator ihit;
@@ -77,11 +82,12 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
   PSimHit isim;
   DetId idet;
   for (ihit=theStripHits.begin();ihit!=theStripHits.end();ihit++){
-       
+    
     DetId tmp=DetId((*ihit).detUnitId());
     //    GlobalPoint gp = tracker->idToDet((*ihit).detUnitId().rawId())
     GlobalPoint gp =tracker->idToDet(tmp)->surface().toGlobal((*ihit).localPosition());
-    //  GlobalVector gv= tracker->idToDet(pippo)->surface().toGlobal((*ihit).localDirection());
+    std::cout<<"SIMHIT POSITION "<<gp<<std::endl;  
+  //  GlobalVector gv= tracker->idToDet(pippo)->surface().toGlobal((*ihit).localDirection());
     if (gp.y()>ymin){
       ymin=gp.y();
       isim=(*ihit);
@@ -93,6 +99,6 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
    //   LocalVector loc=isim.localDirection();
    GlobalVector gv= tracker->idToDet(idet)->surface().toGlobal(isim.localDirection());
    float PP=isim.pabs();
-   if (tracks->size()>0)
-     std::cout<<max<<" max "<<gv*PP<<std::endl;	
+   //   if (tracks->size()>0)
+     //   std::cout<<max<<" max "<<gv*PP<<std::endl;	
 }
