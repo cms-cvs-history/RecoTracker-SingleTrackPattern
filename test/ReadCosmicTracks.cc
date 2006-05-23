@@ -24,14 +24,17 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackExtra.h"
-
+using namespace std;
 ReadCosmicTracks::ReadCosmicTracks(edm::ParameterSet const& conf) : 
   conf_(conf)
 {
 }
-
+void ReadCosmicTracks::beginJob(const edm::EventSetup& c){
+  hFile = new TFile ( "ptRes.root", "RECREATE" );
+  hptres = new TH1F("hptres","Pt resolution",100,-2.,2.);
+}
 // Virtual destructor needed.
-ReadCosmicTracks::~ReadCosmicTracks() { }  
+ReadCosmicTracks::~ReadCosmicTracks() {  }  
 
 // Functions that gets called by framework every event
 void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
@@ -43,6 +46,11 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
   edm::Handle<reco::TrackCollection> trackCollection;
   //    event.getByLabel("trackp", trackCollection);
   e.getByType(trackCollection);
+  
+
+  edm::Handle<TrackingRecHitCollection> trackrechitCollection;
+  //    event.getByLabel("trackp", trackCollection);
+  e.getByType(trackrechitCollection);
   
   //  const reco::TrackCollection tC = *(trackCollection.product());
   //
@@ -63,42 +71,54 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
  
   edm::ESHandle<TrackerGeometry> tracker;
   es.get<TrackerDigiGeometryRecord>().get(tracker);
-   reco::TrackCollection::const_iterator itr;
-   const   reco::TrackCollection *tracks=trackCollection.product();
-   reco::TrackCollection::const_iterator ibeg=tracks->begin();
-   reco::TrackCollection::const_iterator iend=tracks->end();
-//     //  reco::track_iterator ibeg=tracks->begin();
-//   //  reco::track_iterator ibeg2=coll.begin();
-//   //  std::cout <<" FOUND "<<(coll.product())->size()<<" Seeds."<<std::endl;
+ 
+  const   reco::TrackCollection *tracks=trackCollection.product();
+  reco::TrackCollection::const_iterator ibeg=tracks->begin();
+ 
 
-  for (itr=ibeg;itr!=iend;itr++){
-    //  std::cout<<std::endl<<std::endl<<"EVENT ANAL "<<e.id()<<std::endl;
-    //  std::cout<<"Mom of the track "<<(*itr).outerMomentum()<<std::endl;
-  }
-
-  std::vector<PSimHit>::iterator ihit;
-
-  float ymin=-1000;
-  PSimHit isim;
-  DetId idet;
-  for (ihit=theStripHits.begin();ihit!=theStripHits.end();ihit++){
+  if (tracks->size()>0){
+    TrackingRecHitCollection::const_iterator irec;
+    GlobalPoint gp;
+    cout<<endl;
+    for(irec=trackrechitCollection.product()->begin();
+	irec!=trackrechitCollection.product()->end();
+	irec++)   gp =tracker->idToDet((*irec).geographicalId())
+		    ->surface().toGlobal((*irec).localPosition());
+    //   cout<<gp<<endl;
     
-    DetId tmp=DetId((*ihit).detUnitId());
-    //    GlobalPoint gp = tracker->idToDet((*ihit).detUnitId().rawId())
-    GlobalPoint gp =tracker->idToDet(tmp)->surface().toGlobal((*ihit).localPosition());
-    std::cout<<"SIMHIT POSITION "<<gp<<std::endl;  
-  //  GlobalVector gv= tracker->idToDet(pippo)->surface().toGlobal((*ihit).localDirection());
-    if (gp.y()>ymin){
-      ymin=gp.y();
-      isim=(*ihit);
-      idet=DetId(tmp);
+
+    float ptrec = (*ibeg).outerPt();
+  
+
+
+
+
+    std::vector<PSimHit>::iterator ihit;
+    
+    float magmag=10000;
+    PSimHit isim;
+    DetId idet;
+    for (ihit=theStripHits.begin();ihit!=theStripHits.end();ihit++){
+      DetId tmp=DetId((*ihit).detUnitId());
+      GlobalPoint gp1 =tracker->idToDet(tmp)->surface().toGlobal((*ihit).localPosition());
+      
+      if ((gp1-gp).mag()<magmag){
+	magmag=(gp1-gp).mag();
+	isim=(*ihit);
+	idet=DetId(tmp);
+      }
     }
-    // std::cout<<gp<<" "<<std::endl;
+  
+
+    //    GlobalPoint max =tracker->idToDet(idet)->surface().toGlobal(isim.localPosition());
+    GlobalVector gv= tracker->idToDet(idet)->surface().toGlobal(isim.localDirection());
+    float PP=isim.pabs();
+    float ptsim=gv.perp()*PP;
+    hptres->Fill(((1./ptrec)-(1./ptsim))*ptsim);
+    //   std::cout<<max<<" max "<<gv*PP<<" "<<isim.particleType()<<std::endl;	
   }
-   GlobalPoint max =tracker->idToDet(idet)->surface().toGlobal(isim.localPosition());
-   //   LocalVector loc=isim.localDirection();
-   GlobalVector gv= tracker->idToDet(idet)->surface().toGlobal(isim.localDirection());
-   float PP=isim.pabs();
-   //   if (tracks->size()>0)
-     //   std::cout<<max<<" max "<<gv*PP<<std::endl;	
+}
+void ReadCosmicTracks::endJob(){
+  hFile->Write();
+  hFile->Close();
 }
