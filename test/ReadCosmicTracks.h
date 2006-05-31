@@ -15,6 +15,14 @@
 #include <TFile.h>
 #include <TH1F.h>
 
+class CompareTOF {
+ public:
+  CompareTOF(){};
+   bool operator()( PSimHit ps1,
+		    PSimHit ps2){
+
+     return ps1.tof()<ps2.tof();};
+ };
 class ReadCosmicTracks : public edm::EDAnalyzer
 {
  public:
@@ -31,6 +39,13 @@ class ReadCosmicTracks : public edm::EDAnalyzer
   std::vector<PSimHit> theStripHits;
   TFile* hFile;
   TH1F  *hptres;
+  TH1F *hptres1,*hptres2,*hptres3,*hptres4,*hptres5,*hptres6,*hptres7,*hptres8,*hptres9,*hptres10;
+  TH1F  *heffpt,*hrespt;
+  TH1F  *heffhit;
+  uint inum[10];
+  uint iden[10];
+  uint inum2[30];
+  uint iden2[30];
 };
 
 
