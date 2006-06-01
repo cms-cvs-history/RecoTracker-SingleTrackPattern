@@ -2,4 +2,6 @@
   string HitProducer        = "LocalMeasurementConverter"   
   int32 MinHits=5
   double Chi2Cut=30.
+  string TTRHBuilder          "WithTrackAngle"
+
 }
