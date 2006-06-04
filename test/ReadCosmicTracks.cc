@@ -34,16 +34,16 @@ ReadCosmicTracks::ReadCosmicTracks(edm::ParameterSet const& conf) :
 void ReadCosmicTracks::beginJob(const edm::EventSetup& c){
   hFile = new TFile ( "ptRes.root", "RECREATE" );
   hptres = new TH1F("hptres","Pt resolution",100,-0.1,0.1);
-  hptres1 = new TH1F("hptres1","Pt resolution  0-10 GeV",100,-0.1,0.1);
-  hptres2 = new TH1F("hptres2","Pt resolution 10-15 GeV",100,-0.1,0.1);
-  hptres3 = new TH1F("hptres3","Pt resolution 15-20 GeV",100,-0.1,0.1);
-  hptres4 = new TH1F("hptres4","Pt resolution 20-25 GeV",100,-0.1,0.1);
-  hptres5 = new TH1F("hptres5","Pt resolution 25-30 GeV",100,-0.1,0.1);
-  hptres6 = new TH1F("hptres6","Pt resolution 30-35 GeV",100,-0.1,0.1);
-  hptres7 = new TH1F("hptres7","Pt resolution 35-40 GeV",100,-0.1,0.1);
-  hptres8 = new TH1F("hptres8","Pt resolution 40-45 GeV",100,-0.1,0.1);
-  hptres9 = new TH1F("hptres9","Pt resolution 45-50 GeV",100,-0.1,0.1);
-  hptres10 = new TH1F("hptres10","Pt resolution >50 GeV",100,-0.1,0.1);
+  hptres1 = new TH1F("hptres1","Pt resolution  0-10 GeV",100,-0.005,0.005);
+  hptres2 = new TH1F("hptres2","Pt resolution 10-15 GeV",100,-0.005,0.005);
+  hptres3 = new TH1F("hptres3","Pt resolution 15-20 GeV",100,-0.005,0.005);
+  hptres4 = new TH1F("hptres4","Pt resolution 20-25 GeV",100,-0.005,0.005);
+  hptres5 = new TH1F("hptres5","Pt resolution 25-30 GeV",100,-0.005,0.005);
+  hptres6 = new TH1F("hptres6","Pt resolution 30-35 GeV",100,-0.005,0.005);
+  hptres7 = new TH1F("hptres7","Pt resolution 35-40 GeV",100,-0.005,0.005);
+  hptres8 = new TH1F("hptres8","Pt resolution 40-45 GeV",100,-0.005,0.005);
+  hptres9 = new TH1F("hptres9","Pt resolution 45-50 GeV",100,-0.005,0.005);
+  hptres10 = new TH1F("hptres10","Pt resolution >50 GeV",100,-0.005,0.005);
   hrespt= new TH1F("hrespt","resolution as a function of Pt", 10, 5, 55);
   heffpt= new TH1F("heffpt","efficiency as a function of Pt", 10, 5, 55);
   heffhit= new TH1F("heffhit","efficiency as a function of number of hits", 25, 4.5, 29.5);
@@ -84,15 +84,21 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
   theStripHits.insert(theStripHits.end(), TOBHitsHighTof->begin(), TOBHitsHighTof->end());
   theStripHits.insert(theStripHits.end(), TIBHitsLowTof->begin(), TIBHitsLowTof->end());
   theStripHits.insert(theStripHits.end(), TIBHitsHighTof->begin(), TIBHitsHighTof->end());
-
+  edm::ESHandle<TrackerGeometry> tracker;
+  es.get<TrackerDigiGeometryRecord>().get(tracker);
   uint nshit=theStripHits.size();
   edm::Handle<TrajectorySeedCollection> seedcoll;
   e.getByType(seedcoll);
-  if ((seedcoll.product()->size()>0)&&(nshit>4)) trackable_cosmic=true;
+  bool seed_plus= false;
+  if( (seedcoll.product()->size()>0) &&(nshit>4)) {
+    trackable_cosmic=true;
+    unsigned int iraw=(*(*(*seedcoll).begin()).recHits().first).geographicalId().rawId();
+    LocalPoint lp=(*(*(*seedcoll).begin()).recHits().first).localPosition();
+    seed_plus=(tracker->idToDet(DetId(iraw))->surface().toGlobal(lp).y()>0.);
+  }
   if (nshit>30) nshit=30;
-  edm::ESHandle<TrackerGeometry> tracker;
-  es.get<TrackerDigiGeometryRecord>().get(tracker);
- 
+
+  
   stable_sort(theStripHits.begin(),theStripHits.end(),CompareTOF());
   PSimHit isimfirst=(*theStripHits.begin());
   DetId tmp1=DetId(isimfirst.detUnitId());
@@ -158,22 +164,23 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
     float PP=isim.pabs();
     float ptsim=gv.perp()*PP;
     //    cout<<"PTSIM "<<ptsim<<endl;
-    float ptresrel=((1./ptrec)-(1./ptsim))*ptsim;
-    hptres->Fill(ptresrel);
-    unsigned int iptsim= uint(ptsim/5 -1);
-    if (iptsim>10) iptsim=10;
-    
-    if (iptsim==1) hptres1->Fill(ptresrel);
-    if (iptsim==2) hptres2->Fill(ptresrel);
-    if (iptsim==3) hptres3->Fill(ptresrel);
-    if (iptsim==4) hptres4->Fill(ptresrel);
-    if (iptsim==5) hptres5->Fill(ptresrel);
-    if (iptsim==6) hptres6->Fill(ptresrel);
-    if (iptsim==7) hptres7->Fill(ptresrel);
-    if (iptsim==8) hptres8->Fill(ptresrel);
-    if (iptsim==9) hptres9->Fill(ptresrel);
-    if (iptsim==10) hptres10->Fill(ptresrel);
-    
+    float ptresrel=((1./ptrec)-(1./ptsim));
+    if (seed_plus){  
+      hptres->Fill(ptresrel);
+      unsigned int iptsim= uint(ptsim/5 -1);
+      if (iptsim>10) iptsim=10;
+      
+      if (iptsim==1) hptres1->Fill(ptresrel);
+      if (iptsim==2) hptres2->Fill(ptresrel);
+      if (iptsim==3) hptres3->Fill(ptresrel);
+      if (iptsim==4) hptres4->Fill(ptresrel);
+      if (iptsim==5) hptres5->Fill(ptresrel);
+      if (iptsim==6) hptres6->Fill(ptresrel);
+      if (iptsim==7) hptres7->Fill(ptresrel);
+      if (iptsim==8) hptres8->Fill(ptresrel);
+      if (iptsim==9) hptres9->Fill(ptresrel);
+      if (iptsim==10) hptres10->Fill(ptresrel);
+    }
   
   }
 }
