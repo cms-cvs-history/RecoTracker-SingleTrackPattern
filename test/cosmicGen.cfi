@@ -1,8 +1,7 @@
- source = CosMuoGenSource {
-    untracked int32  maxEvents = 5
-    untracked int32  RanSeed = 123456
-    untracked double MinEn =    10.
-    untracked double MaxEn =  5000.
+  source = CosMuoGenSource {
+    untracked int32  maxEvents = 500
+    untracked double MinEn =    2.
+    untracked double MaxEn =   10000
     untracked double MinTheta =  0.
     untracked double MaxTheta = 88.
     untracked double MinPhi =    0.
@@ -10,5 +9,8 @@
     untracked double MinT0  =  -12.5
     untracked double MaxT0  =   12.5
     untracked double ElossScaleFactor = 0.0
+    #WARNING: If "TrackerOnly=true" then tracker-only setup will be used. 
+    #This means R=1100 and Z=1100, no material or B-field outside is considered
+    untracked bool TrackerOnly = true
     untracked bool Verbosity = false
   }

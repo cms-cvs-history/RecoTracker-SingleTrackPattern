@@ -6,17 +6,13 @@
       untracked int32 G4StackManagerVerbosity = 0
       untracked int32 G4TrackingManagerVerbosity = 0
       bool UseMagneticField = true
-      # bool UseMagneticField = false
       bool OverrideUserStackingAction = true
       bool StoreRndmSeeds = false
       bool RestoreRndmSeeds = false
       string PhysicsTablesDirectory = "PhysicsTables"
       bool StorePhysicsTables = false
       bool RestorePhysicsTables = false
-      #VPSet Watchers = {
-      # { string type = "SimTracer"
-      #   bool verbose = true }
-      #}
+      #VPSet Watchers = { }
       PSet MagneticField =
       {
          double delta = 1.
@@ -33,6 +29,9 @@
          double DefaultCutValue = 1000.  # cuts in cm, i.e. 10m
          untracked int32 Verbosity = 0   # 1 will print cuts as they get set fdrom DD
                                          # 2 will do as 1 + will dump Geant4 table of cuts
+	 double GFlashEmin = 1.0
+	 double GFlashEmax = 1000000.0
+	 double GFlashToKill = 0.1
       }
       PSet Generator =
       {
@@ -55,30 +54,15 @@
          string StopFile = "StopRun"
          untracked bool debug = false
       }
-
       PSet TrackingAction =
       {
          untracked bool DetailedTiming = false
       }
-     PSet UtilityActions =
-      {
-               string type = "SimG4Core/UtilityAction/TrackingVerboseAction"
-               untracked bool  DEBUG = false
-               untracked bool  CheckForHighEtPhotons = false
-               untracked int32 EventMin = 0
-               untracked int32 EventMax = 0
-               untracked int32 EventStep = 1
-               untracked int32 TrackMin = 0
-               untracked int32 TrackMax = 0
-               untracked int32 TrackStep = 1
-               untracked int32 VerboseLevel = 0 
-      }
-
       PSet SteppingAction =
       {
          bool   KillBeamPipe = true
          double CriticalEnergyForVacuum = 2.0
-         double CriticalDensity = 1.e-25
+         double CriticalDensity = 1.e-15
          untracked int32  Verbosity = 0
       }
       PSet TrackerSD =
@@ -99,9 +83,9 @@
 
       PSet CaloSD = {
          double EminTrack = 1.0
-         untracked  int32  CheckHits = 25
+         untracked int32  CheckHits = 25
          untracked bool   UseMap = true
-         #int32  Verbosity = 1
+         #untracked int32  Verbosity = 1
          untracked int32 Verbosity = 0
          untracked bool   DetailedTiming = false
       }
@@ -127,7 +111,7 @@
          bool   TestBeam  = false
          double EminTrack = 0.01
       }
-      PSet HFShower =    {
+      PSet HFShower = {
          #int32  Verbosity = 11
          int32 Verbosity = 0
          double ProbMax   = 0.7268
@@ -149,4 +133,4 @@
          double Gain            = 0.33
          bool   CheckSurvive    = false
       }
-   }  # end of OscarProducer's PSet's/block
+   }
