@@ -1,8 +1,8 @@
  module cosmictrackfinder= CosmicTrackFinder{
   string HitProducer        = "LocalMeasurementConverter"   
-  int32 MinHits=5
+  int32 MinHits=3
   double Chi2Cut=30.
-  string TTRHBuilder          "WithTrackAngle"
+  string TTRHBuilder   =       "WithTrackAngle"
   double FinalChi2Cut =200.
   untracked  string GeometricStructure ="MTCC"
 }

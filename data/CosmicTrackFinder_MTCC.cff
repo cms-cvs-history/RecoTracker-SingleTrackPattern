@@ -7,5 +7,5 @@ include "RecoTracker/TransientTrackingRecHit/data/TransientTrackingRecHitBuilder
 include "RecoTracker/TkSeedGenerator/data/CosmicSeed_MTCC.cff"
 #############
 
-#include "RecoTracker/SingleTrackPattern/data/CosmicTrackFinder.cfi"
+include "RecoTracker/SingleTrackPattern/data/CosmicTrackFinder_MTCC.cfi"
 
