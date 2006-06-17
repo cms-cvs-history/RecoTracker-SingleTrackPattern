@@ -40,12 +40,16 @@ class ReadCosmicTracks : public edm::EDAnalyzer
   TFile* hFile;
   TH1F  *hptres;
   TH1F *hptres1,*hptres2,*hptres3,*hptres4,*hptres5,*hptres6,*hptres7,*hptres8,*hptres9,*hptres10;
-  TH1F  *heffpt,*hrespt;
+ TH1F  *hchiSq;
+  TH1F *hchiSq1,*hchiSq2,*hchiSq3,*hchiSq4,*hchiSq5,*hchiSq6,*hchiSq7,*hchiSq8,*hchiSq9,*hchiSq10;
+  TH1F  *heffpt,*hrespt,*hchipt,*hchiR;
   TH1F  *heffhit;
   uint inum[10];
   uint iden[10];
-  uint inum2[30];
-  uint iden2[30];
+  uint inum2[9];
+  uint iden2[9];
+  float ichiR[10];
+  uint iden3[10];
 };
 
 
