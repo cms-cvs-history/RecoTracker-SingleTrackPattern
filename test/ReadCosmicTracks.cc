@@ -1,30 +1,21 @@
-// File: ReadSeeds.cc
-// Description:  see ReadSeeds.h
-// Author:  O. Gutsche
-// Creation Date:  OGU Aug. 1 2005 Initial version.
-//
+// File: ReadCosmicTracks.cc
+// Description:  see ReadCosmicTracks.h
+// Author:  M.Pioppi Univ. & INFN Perugia
 //--------------------------------------------
 #include <memory>
 #include <string>
 #include <iostream>
 
 #include "RecoTracker/SingleTrackPattern/test/ReadCosmicTracks.h"
-
-#include "DataFormats/TrajectorySeed/interface/TrajectorySeedCollection.h"
-#include "FWCore/Framework/interface/Handle.h"
-#include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "Geometry/Vector/interface/GlobalPoint.h"
 #include "Geometry/Vector/interface/GlobalVector.h"
 #include "Geometry/Vector/interface/LocalVector.h"
-#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetType.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
-#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
-#include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/TrackReco/interface/TrackExtra.h"
-#include "DataFormats/TrajectorySeed/interface/TrajectorySeedCollection.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "TrackingTools/Records/interface/TransientRecHitRecord.h" 
 using namespace std;
 using namespace edm;
 ReadCosmicTracks::ReadCosmicTracks(edm::ParameterSet const& conf) : 
@@ -33,6 +24,7 @@ ReadCosmicTracks::ReadCosmicTracks(edm::ParameterSet const& conf) :
 }
 void ReadCosmicTracks::beginJob(const edm::EventSetup& c){
 
+  //HISTOGRAM BOOKING
   hFile = new TFile ( "ptRes.root", "RECREATE" );
   hptres = new TH1F("hptres","Pt resolution",100,-0.1,0.1);
   hptres1 = new TH1F("hptres1","Pt resolution  0-10 GeV",100,-0.005,0.005);
@@ -61,6 +53,8 @@ void ReadCosmicTracks::beginJob(const edm::EventSetup& c){
   hrespt= new TH1F("hrespt","resolution as a function of Pt", 10, 5, 55);
   heffpt= new TH1F("heffpt","efficiency as a function of Pt", 10, 5, 55);
   heffhit= new TH1F("heffhit","efficiency as a function of number of hits", 9, 5, 50);
+  hcharge=new TH1F("hcharge","1=SIM+REC+,2=SIM+REC-,3=SIM-REC-,4=SIM-REC+",4,0.5,4.5);
+  // COUNTERS INITIALIZATION
   for (uint ik=0;ik<10;ik++){
     inum[ik]=0;
     iden[ik]=0;
@@ -78,13 +72,11 @@ ReadCosmicTracks::~ReadCosmicTracks() {  }
 // Functions that gets called by framework every event
 void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
 {
- //  using namespace edm;
-  //  std::cout<<"EV "<<e.id()<<std::endl; 
-  // Step A: Get Inputs 
+  
+ 
   
   bool trackable_cosmic=false;
-  //  const reco::TrackCollection tC = *(trackCollection.product());
-  //
+  //SIM HITS
   theStripHits.clear();
   edm::Handle<edm::PSimHitContainer> TOBHitsLowTof;
   edm::Handle<edm::PSimHitContainer> TOBHitsHighTof;
@@ -92,7 +84,7 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
   edm::Handle<edm::PSimHitContainer> TIBHitsHighTof;
   edm::Handle<edm::PSimHitContainer> PixelBarrelLowTof;
   edm::Handle<edm::PSimHitContainer> PixelBarrelHighTof;
-  //
+  
   e.getByLabel("SimG4Object","TrackerHitsTOBLowTof", TOBHitsLowTof);
   e.getByLabel("SimG4Object","TrackerHitsTOBHighTof", TOBHitsHighTof);
   e.getByLabel("SimG4Object","TrackerHitsTIBLowTof", TIBHitsLowTof);
@@ -105,44 +97,54 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
   theStripHits.insert(theStripHits.end(), TIBHitsHighTof->begin(), TIBHitsHighTof->end());
   theStripHits.insert(theStripHits.end(), PixelBarrelLowTof->begin(), PixelBarrelLowTof->end());
   theStripHits.insert(theStripHits.end(), PixelBarrelHighTof->begin(), PixelBarrelHighTof->end());
-  edm::ESHandle<TrackerGeometry> tracker;
-  es.get<TrackerDigiGeometryRecord>().get(tracker);
-  uint nshit=theStripHits.size();
+
+  //RECONSTRUCTED OBJECTS
+  //SEEDS AND TRACKS
   edm::Handle<TrajectorySeedCollection> seedcoll;
   e.getByType(seedcoll);
-  bool seed_plus= false;
+
+  edm::Handle<reco::TrackCollection> trackCollection;
+  e.getByLabel("cosmictrackfinder",trackCollection);
+
+  edm::Handle<TrackingRecHitCollection> trackrechitCollection;
+  e.getByType(trackrechitCollection);
+
+  //TRACKER GEOMETRY
+
+  es.get<TrackerDigiGeometryRecord>().get(tracker);
+
+  //SIMULATED INFORMATION:
+  //NUMBER OF SIMHIT ,CHARGE  AND PT
+  uint nshit=theStripHits.size();
+  stable_sort(theStripHits.begin(),theStripHits.end(),CompareTOF());
+  PSimHit isimfirst=(*theStripHits.begin());
+  int chsim=-1*isimfirst.particleType()/abs(isimfirst.particleType());
+  DetId tmp1=DetId(isimfirst.detUnitId());
+  GlobalVector gvs= tracker->idToDet(tmp1)->surface().toGlobal(isimfirst.localDirection());
+  float ptsims=gvs.perp()*isimfirst.pabs();
+
+
+ 
+  //CRITERION TO SAY IF A MUON IS TRACKABLE OR NOT
   if( (seedcoll.product()->size()>0) &&(nshit>4)) {
     trackable_cosmic=true;
     seed_plus=((*(*seedcoll).begin()).direction()==alongMomentum);
    }
+
   if (nshit>50) nshit=50;
   uint inshit=(nshit/5)-1;
-  
-  stable_sort(theStripHits.begin(),theStripHits.end(),CompareTOF());
-  PSimHit isimfirst=(*theStripHits.begin());
-  DetId tmp1=DetId(isimfirst.detUnitId());
-  GlobalVector gvs= tracker->idToDet(tmp1)->surface().toGlobal(isimfirst.localDirection());
-  float ptsims=gvs.perp()*isimfirst.pabs();
   unsigned int iptsims= uint(ptsims/5 -1);
   if (iptsims>10) iptsims=10;  
 
+  //INCREASE THE NUMBER OF TRACKABLE MUONS
   if (trackable_cosmic){
     iden[iptsims]++;
     iden2[inshit]++;
   }
-
-
-  edm::Handle<reco::TrackCollection> trackCollection;
-  //    event.getByLabel("trackp", trackCollection);
-  e.getByLabel("cosmictrackfinder",trackCollection);
   
-
-  edm::Handle<TrackingRecHitCollection> trackrechitCollection;
-  //    event.getByLabel("trackp", trackCollection);
-  e.getByType(trackrechitCollection);
-  
-
+  //RECONSTRUCTED INFORMATION
   const   reco::TrackCollection *tracks=trackCollection.product();
+  //INCREASE THE NUMBER OF TRACKED MUONS
   if (tracks->size()>0){
     reco::TrackCollection::const_iterator ibeg=tracks->begin();
     if (trackable_cosmic) {
@@ -153,14 +155,22 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
     GlobalPoint gp((*ibeg).outerPosition().x(),
 		   (*ibeg).outerPosition().y(),
 		   (*ibeg).outerPosition().z());
-  
+
+    //PT,Chi2,CHARGE RECONSTRUCTED
     float ptrec = (*ibeg).outerPt();
     float chiSquared =(*ibeg).chi2();
+    int chrec=(*ibeg).charge();
+    cout<<"Dentro Anal "<< chiSquared<<endl;
+    //FILL CHARGE HISTOGRAM 
+    if(chrec==1 && chsim==1) hcharge->Fill(1);
+    if(chrec==-1 && chsim==1) hcharge->Fill(2);
+    if(chrec==-1 && chsim==-1) hcharge->Fill(3);
+    if(chrec==1 && chsim==-1) hcharge->Fill(4);
+  
 
-
-    //    cout<<"PTREC "<<ptrec<<endl;
-
-
+    //FIND THE SIMULATED HIT CLOSEST TO THE 
+    //FIRST REC HIT OF THE TRACK  
+    //AND THE RADIAL DISTANCE OF THE TRACK
     std::vector<PSimHit>::iterator ihit;
     float MAGR=10000;
     float magmag=10000;
@@ -177,15 +187,22 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
 	idet=DetId(tmp);
       }
     }
+    //CHI2 vs RADIAL DISTANCE
     uint iRR=uint(MAGR/10);
     iden3[iRR]++;
     ichiR[iRR]+=chiSquared;
-    //    GlobalPoint max =tracker->idToDet(idet)->surface().toGlobal(isim.localPosition());
+
+
+    //REEVALUATION OF THE SIMULATED PT
     GlobalVector gv= tracker->idToDet(idet)->surface().toGlobal(isim.localDirection());
     float PP=isim.pabs();
     float ptsim=gv.perp()*PP;
-      float ptresrel=((1./ptrec)-(1./ptsim));
+    //PT^-1 RESOLUTION
+    float ptresrel=((1./ptrec)-(1./ptsim));
     //   if (seed_plus){  
+
+    //FILL PT RESOLUTION AND CHI2 HISTO 
+    //IN PT BIN
       hptres->Fill(ptresrel);
       hchiSq->Fill(chiSquared);
       unsigned int iptsim= uint(ptsim/5 -1);
@@ -233,17 +250,67 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
       }
       // }
   
+      vector<float> ale=makeResiduals((*(*seedcoll).begin()),
+				      e,
+				      es);
   }
 }
+vector<float> ReadCosmicTracks::makeResiduals(const TrajectorySeed& seed,
+					      const edm::Event& e, 
+					      const edm::EventSetup& es){
+
+  edm::ESHandle<MagneticField> magfield;
+
+  //services
+  es.get<IdealMagneticFieldRecord>().get(magfield);
+  es.get<TrackerDigiGeometryRecord>().get(tracker);
+  
+ 
+  
+  if (seed_plus) { 	 
+    thePropagator=      new PropagatorWithMaterial(alongMomentum,0.1057,&(*magfield) ); 	 
+    thePropagatorOp=    new PropagatorWithMaterial(oppositeToMomentum,0.1057,&(*magfield) );} 	 
+  else {
+    thePropagator=      new PropagatorWithMaterial(oppositeToMomentum,0.1057,&(*magfield) ); 	
+    thePropagatorOp=    new PropagatorWithMaterial(alongMomentum,0.1057,&(*magfield) );
+  }
+  
+  theUpdator=       new KFUpdator();
+  theEstimator=     new Chi2MeasurementEstimator(30);
+  
+  
+  edm::ESHandle<TransientTrackingRecHitBuilder> theBuilder;
+  std::string builderName = conf_.getParameter<std::string>("TTRHBuilder");   
+  es.get<TransientRecHitRecord>().get(builderName,theBuilder);  
+  RHBuilder=   theBuilder.product();
+
+
+  theFitter=        new KFTrajectoryFitter(*thePropagator,
+					   *theUpdator,	
+					   *theEstimator) ;
+  theSmoother=      new KFTrajectorySmoother(*thePropagatorOp,
+					     *theUpdator,	
+					     *theEstimator);
+ 
+
+
+  vector<float> residuals;
+  return residuals;
+
+}
+
 void ReadCosmicTracks::endJob(){
+  //FILL EFFICIENCY vs PT
+  //AND CHI2 vs R
   for  (uint ik=0;ik<10;ik++) {
     heffpt->Fill(7.5+(ik*5),float(inum[ik])/float(iden[ik]));
     hchiR->Fill(10+(ik*10),ichiR[ik]/float(iden3[ik]));
   }
-
+  //FILL EFFICIENCY vs NHIT
   for  (uint ik=0;ik<9;ik++) {
     heffhit->Fill(7.5+(ik*5),float(inum2[ik])/float(iden2[ik]));
   }
+  //FILL CHI2 vs PT 
   hchipt->Fill(7.5,hchiSq1->GetMean());
   hchipt->Fill(12.5,hchiSq2->GetMean());
   hchipt->Fill(17.5,hchiSq3->GetMean());
@@ -254,6 +321,8 @@ void ReadCosmicTracks::endJob(){
   hchipt->Fill(42.5,hchiSq8->GetMean());
   hchipt->Fill(47.5,hchiSq9->GetMean());
   hchipt->Fill(52.5,hchiSq10->GetMean());
+
+  //WRITE ROOT FILE
   hFile->Write();
   hFile->Close();
 }
