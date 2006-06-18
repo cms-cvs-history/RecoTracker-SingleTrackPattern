@@ -23,6 +23,7 @@
 #include "TrackingTools/TrackFitters/interface/KFTrajectorySmoother.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 #include <TROOT.h>
 #include <TFile.h>
 #include <TH1F.h>
@@ -37,6 +38,7 @@ class CompareTOF {
  };
 class ReadCosmicTracks : public edm::EDAnalyzer
 {
+ typedef TrajectoryStateOnSurface     TSOS;
  public:
   
   explicit ReadCosmicTracks(const edm::ParameterSet& conf);
@@ -46,13 +48,16 @@ class ReadCosmicTracks : public edm::EDAnalyzer
   virtual void endJob(); 
   virtual void analyze(const edm::Event& e, const edm::EventSetup& c);
  
-  std::vector<float> makeResiduals(const TrajectorySeed& seed,
-				   const edm::Event& e, 
-				   const edm::EventSetup& es);
+  void makeResiduals(const TrajectorySeed& seed,
+		     const TrackingRecHitCollection & hits,
+		     const edm::Event& e, 
+		     const edm::EventSetup& es);
+  TSOS startingTSOS(const TrajectorySeed& seed)const;
  private:
   edm::ParameterSet conf_;
   std::vector<PSimHit> theStripHits;
   edm::ESHandle<TrackerGeometry> tracker;
+  edm::ESHandle<MagneticField> magfield;
   TFile* hFile;
   TH1F  *hptres;
   TH1F *hptres1,*hptres2,*hptres3,*hptres4,*hptres5,*hptres6,*hptres7,*hptres8,*hptres9,*hptres10;
@@ -60,6 +65,7 @@ class ReadCosmicTracks : public edm::EDAnalyzer
   TH1F *hchiSq1,*hchiSq2,*hchiSq3,*hchiSq4,*hchiSq5,*hchiSq6,*hchiSq7,*hchiSq8,*hchiSq9,*hchiSq10;
   TH1F  *heffpt,*hrespt,*hchipt,*hchiR;
   TH1F  *heffhit,*hcharge;
+  TH1F  *hresTIB,*hresTOB,*hresTID,*hresTEC;
   uint inum[10];
   uint iden[10];
   uint inum2[9];
@@ -74,6 +80,7 @@ class ReadCosmicTracks : public edm::EDAnalyzer
   const TransientTrackingRecHitBuilder *RHBuilder;
   const KFTrajectorySmoother * theSmoother;
   const KFTrajectoryFitter * theFitter;
+  TrajectoryStateTransform tsTransform;
 };
 
 

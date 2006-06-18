@@ -16,6 +16,11 @@
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "TrackingTools/Records/interface/TransientRecHitRecord.h" 
+#include "RecoTracker/SingleTrackPattern/interface/CosmicTrajectoryBuilder.h"
+#include "TrackingTools/PatternTools/interface/MeasurementExtractor.h"
+#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
+#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
+
 using namespace std;
 using namespace edm;
 ReadCosmicTracks::ReadCosmicTracks(edm::ParameterSet const& conf) : 
@@ -54,6 +59,11 @@ void ReadCosmicTracks::beginJob(const edm::EventSetup& c){
   heffpt= new TH1F("heffpt","efficiency as a function of Pt", 10, 5, 55);
   heffhit= new TH1F("heffhit","efficiency as a function of number of hits", 9, 5, 50);
   hcharge=new TH1F("hcharge","1=SIM+REC+,2=SIM+REC-,3=SIM-REC-,4=SIM-REC+",4,0.5,4.5);
+  hresTIB=new TH1F("hresTIB","residuals for TIB modules",100,-0.05,0.05);
+  hresTOB=new TH1F("hresTOB","residuals for TOB modules",100,-0.05,0.05);
+  hresTID=new TH1F("hresTID","residuals for TID modules",100,-0.05,0.05);
+  hresTEC=new TH1F("hresTEC","residuals for TEC modules",100,-0.05,0.05);
+
   // COUNTERS INITIALIZATION
   for (uint ik=0;ik<10;ik++){
     inum[ik]=0;
@@ -160,7 +170,7 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
     float ptrec = (*ibeg).outerPt();
     float chiSquared =(*ibeg).chi2();
     int chrec=(*ibeg).charge();
-    cout<<"Dentro Anal "<< chiSquared<<endl;
+    //cout<<"CHI1 "<< chiSquared<<endl;
     //FILL CHARGE HISTOGRAM 
     if(chrec==1 && chsim==1) hcharge->Fill(1);
     if(chrec==-1 && chsim==1) hcharge->Fill(2);
@@ -250,16 +260,18 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
       }
       // }
   
-      vector<float> ale=makeResiduals((*(*seedcoll).begin()),
-				      e,
-				      es);
+      makeResiduals((*(*seedcoll).begin()),
+		    *trackrechitCollection,
+		    e,
+		    es);
   }
 }
-vector<float> ReadCosmicTracks::makeResiduals(const TrajectorySeed& seed,
-					      const edm::Event& e, 
-					      const edm::EventSetup& es){
+void ReadCosmicTracks::makeResiduals(const TrajectorySeed& seed,
+				     const TrackingRecHitCollection &hits,
+				     const edm::Event& e, 
+				     const edm::EventSetup& es){
 
-  edm::ESHandle<MagneticField> magfield;
+
 
   //services
   es.get<IdealMagneticFieldRecord>().get(magfield);
@@ -288,14 +300,43 @@ vector<float> ReadCosmicTracks::makeResiduals(const TrajectorySeed& seed,
   theFitter=        new KFTrajectoryFitter(*thePropagator,
 					   *theUpdator,	
 					   *theEstimator) ;
-  theSmoother=      new KFTrajectorySmoother(*thePropagatorOp,
-					     *theUpdator,	
-					     *theEstimator);
+//   theSmoother=      new KFTrajectorySmoother(*thePropagatorOp,
+// 					     *theUpdator,	
+// 					     *theEstimator);
  
+  TSOS startingState=startingTSOS(seed);
+  
+  //  if (seed_plus) stable_sort(hits.begin(),hits.end(),CompareHitY_plus(*tracker));
+  edm::OwnVector<const TransientTrackingRecHit> trans_hits;
+  for (unsigned int icosmhit=hits.size()-1;icosmhit>0;icosmhit--){
+    TransientTrackingRecHit* tmphit=RHBuilder->build(&(hits[icosmhit]));
+    trans_hits.push_back(&(*tmphit));
 
+  }
+  TransientTrackingRecHit* tmphit=RHBuilder->build(&(hits[0]));
+  trans_hits.push_back(&(*tmphit));
 
-  vector<float> residuals;
-  return residuals;
+  //  for (edm::OwnVector<const TransientTrackingRecHit>::const_iterator itp=trans_hits.begin();
+  //    itp!=trans_hits.end();itp++)  cout<<(*itp).globalPosition()<<endl;
+  const Trajectory ifitted= *(theFitter->fit(seed,trans_hits,startingState).begin());
+  // cout<<"CHI2 "<<ifitted.chiSquared()<<endl;
+  //  const Trajectory ismoothed=*(theSmoother->trajectories(ifitted).begin());
+  // cout<<"CHI3 "<<ismoothed.chiSquared()<<endl;
+  std::vector<TrajectoryMeasurement> TMeas=ifitted.measurements();
+  //  cout<<"TM "<<TMeas.size()<<endl;
+  vector<TrajectoryMeasurement>::iterator itm;
+  for (itm=TMeas.begin();itm!=TMeas.end();itm++){
+    MeasurementExtractor me((*itm).updatedState());
+    AlgebraicVector r((*itm).recHit()->parameters() - me.measuredParameters(*(*itm).recHit()));  
+    unsigned int subid=(*itm).recHit()->geographicalId().subdetId();
+    if    (subid==  StripSubdetector::TIB) hresTIB->Fill(r[0]);
+    if    (subid==  StripSubdetector::TOB) hresTOB->Fill(r[0]);
+    if    (subid==  StripSubdetector::TID) hresTID->Fill(r[0]);
+    if    (subid==  StripSubdetector::TEC) hresTEC->Fill(r[0]);
+    //cout<<r<<" "<<r[0]<<endl;
+    //  cout<<"tm "<<(*itm).updatedState().globalPosition()<<" "<<(*itm).recHit()->globalPosition()<<endl;
+  }
+
 
 }
 
@@ -325,4 +366,14 @@ void ReadCosmicTracks::endJob(){
   //WRITE ROOT FILE
   hFile->Write();
   hFile->Close();
+}
+TrajectoryStateOnSurface
+ReadCosmicTracks::startingTSOS(const TrajectorySeed& seed)const
+{
+  PTrajectoryStateOnDet pState( seed.startingState());
+  const GeomDet* gdet  = (&(*tracker))->idToDet(DetId(pState.detId()));
+  TSOS  State= tsTransform.transientState( pState, &(gdet->surface()), 
+					   &(*magfield));
+  return State;
+
 }
