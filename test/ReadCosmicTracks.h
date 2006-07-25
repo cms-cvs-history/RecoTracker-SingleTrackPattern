@@ -81,6 +81,7 @@ class ReadCosmicTracks : public edm::EDAnalyzer
   const KFTrajectorySmoother * theSmoother;
   const KFTrajectoryFitter * theFitter;
   TrajectoryStateTransform tsTransform;
+  const PSimHit *isim;
 };
 
 

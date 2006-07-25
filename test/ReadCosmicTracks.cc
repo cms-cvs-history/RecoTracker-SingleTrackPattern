@@ -184,28 +184,28 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
     std::vector<PSimHit>::iterator ihit;
     float MAGR=10000;
     float magmag=10000;
-    PSimHit isim;
     DetId idet;
     for (ihit=theStripHits.begin();ihit!=theStripHits.end();ihit++){
       DetId tmp=DetId((*ihit).detUnitId());
       GlobalPoint gp1 =tracker->idToDet(tmp)->surface().toGlobal((*ihit).localPosition());
-      float RR=sqrt((gp1.x()*gp1.x())+(gp1.y()*gp1.y()));
+
+     float RR=sqrt((gp1.x()*gp1.x())+(gp1.y()*gp1.y()));
       if (RR<MAGR) MAGR=RR;
       if ((gp1-gp).mag()<magmag){
 	magmag=(gp1-gp).mag();
-	isim=(*ihit);
+	isim=&(*ihit);
 	idet=DetId(tmp);
       }
     }
-    //CHI2 vs RADIAL DISTANCE
+//     //CHI2 vs RADIAL DISTANCE
     uint iRR=uint(MAGR/10);
     iden3[iRR]++;
     ichiR[iRR]+=chiSquared;
 
 
     //REEVALUATION OF THE SIMULATED PT
-    GlobalVector gv= tracker->idToDet(idet)->surface().toGlobal(isim.localDirection());
-    float PP=isim.pabs();
+    GlobalVector gv= tracker->idToDet(idet)->surface().toGlobal(isim->localDirection());
+    float PP=isim->pabs();
     float ptsim=gv.perp()*PP;
     //PT^-1 RESOLUTION
     float ptresrel=((1./ptrec)-(1./ptsim));
