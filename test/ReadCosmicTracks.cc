@@ -307,13 +307,16 @@ void ReadCosmicTracks::makeResiduals(const TrajectorySeed& seed,
   TSOS startingState=startingTSOS(seed);
   
   //  if (seed_plus) stable_sort(hits.begin(),hits.end(),CompareHitY_plus(*tracker));
-  edm::OwnVector<const TransientTrackingRecHit> trans_hits;
+  //RC edm::OwnVector<const TransientTrackingRecHit> trans_hits;
+  TransientTrackingRecHit::RecHitContainer trans_hits;
   for (unsigned int icosmhit=hits.size()-1;icosmhit>0;icosmhit--){
-    TransientTrackingRecHit* tmphit=RHBuilder->build(&(hits[icosmhit]));
+    //RC TransientTrackingRecHit* tmphit=RHBuilder->build(&(hits[icosmhit]));
+    TransientTrackingRecHit::RecHitPointer tmphit=RHBuilder->build(&(hits[icosmhit]));
     trans_hits.push_back(&(*tmphit));
 
   }
-  TransientTrackingRecHit* tmphit=RHBuilder->build(&(hits[0]));
+  //RC TransientTrackingRecHit* tmphit=RHBuilder->build(&(hits[0]));
+  TransientTrackingRecHit::RecHitPointer tmphit=RHBuilder->build(&(hits[0]));
   trans_hits.push_back(&(*tmphit));
 
   //  for (edm::OwnVector<const TransientTrackingRecHit>::const_iterator itp=trans_hits.begin();
