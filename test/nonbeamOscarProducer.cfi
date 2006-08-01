@@ -1,4 +1,4 @@
-  module SimG4Object = OscarProducer
+  module g4SimHits = OscarProducer
    {
       bool NonBeamEvent = true
       untracked int32 RunNumber = 1001

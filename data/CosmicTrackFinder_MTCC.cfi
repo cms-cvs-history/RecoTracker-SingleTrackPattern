@@ -1,5 +1,5 @@
  module cosmictrackfinder= CosmicTrackFinder{
-  string HitProducer        = "LocalMeasurementConverter"   
+  string HitProducer        = "siStripRecHits"   
   int32 MinHits=3
   double Chi2Cut=30.
   string TTRHBuilder   =       "WithTrackAngle"

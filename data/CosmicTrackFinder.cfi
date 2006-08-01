@@ -1,7 +1,7 @@
  module cosmictrackfinder= CosmicTrackFinder{
-  InputTag matchedRecHits = SiStripRecHits2D:matchedRecHit
-  InputTag rphiRecHits    = SiStripRecHits2D:rphiRecHit
-  InputTag stereoRecHit   = SiStripRecHits2D:stereoRecHit
+  InputTag matchedRecHits = siStripMatchedRecHits:matchedRecHit
+  InputTag rphiRecHits    = siStripMatchedRecHits:rphiRecHit
+  InputTag stereoRecHit   = siStripMatchedRecHits:stereoRecHit
   int32 MinHits=5
   double Chi2Cut=30.
   string TTRHBuilder    =   "WithTrackAngle"
