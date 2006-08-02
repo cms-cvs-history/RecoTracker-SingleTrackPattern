@@ -95,12 +95,12 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
   edm::Handle<edm::PSimHitContainer> PixelBarrelLowTof;
   edm::Handle<edm::PSimHitContainer> PixelBarrelHighTof;
   
-  e.getByLabel("SimG4Object","TrackerHitsTOBLowTof", TOBHitsLowTof);
-  e.getByLabel("SimG4Object","TrackerHitsTOBHighTof", TOBHitsHighTof);
-  e.getByLabel("SimG4Object","TrackerHitsTIBLowTof", TIBHitsLowTof);
-  e.getByLabel("SimG4Object","TrackerHitsTIBHighTof", TIBHitsHighTof);
-  e.getByLabel("SimG4Object","TrackerHitsPixelBarrelLowTof", PixelBarrelLowTof);
-  e.getByLabel("SimG4Object","TrackerHitsPixelBarrelHighTof", PixelBarrelHighTof);
+  e.getByLabel("g4SimHits","TrackerHitsTOBLowTof", TOBHitsLowTof);
+  e.getByLabel("g4SimHits","TrackerHitsTOBHighTof", TOBHitsHighTof);
+  e.getByLabel("g4SimHits","TrackerHitsTIBLowTof", TIBHitsLowTof);
+  e.getByLabel("g4SimHits","TrackerHitsTIBHighTof", TIBHitsHighTof);
+  e.getByLabel("g4SimHits","TrackerHitsPixelBarrelLowTof", PixelBarrelLowTof);
+  e.getByLabel("g4SimHits","TrackerHitsPixelBarrelHighTof", PixelBarrelHighTof);
   theStripHits.insert(theStripHits.end(), TOBHitsLowTof->begin(), TOBHitsLowTof->end());
   theStripHits.insert(theStripHits.end(), TOBHitsHighTof->begin(), TOBHitsHighTof->end());
   theStripHits.insert(theStripHits.end(), TIBHitsLowTof->begin(), TIBHitsLowTof->end());
