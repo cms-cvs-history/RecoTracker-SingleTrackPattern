@@ -1,5 +1,5 @@
   source = CosMuoGenSource {
-    untracked int32  maxEvents = 500
+    untracked int32  maxEvents = 3
     untracked double MinEn =    2.
     untracked double MaxEn =   10000
     untracked double MinTheta =  0.
