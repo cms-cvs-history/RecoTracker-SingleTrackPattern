@@ -20,7 +20,9 @@
 #include "TrackingTools/PatternTools/interface/MeasurementExtractor.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-
+#include "TrackingTools/TrajectoryState/interface/BasicSingleTrajectoryState.h"
+#include "TrackingTools/TrackFitters/interface/TrajectoryStateWithArbitraryError.h"
+#include "RecoTracker/SingleTrackPattern/test/TrajectoryMeasurementResidual.h"
 using namespace std;
 using namespace edm;
 ReadCosmicTracks::ReadCosmicTracks(edm::ParameterSet const& conf) : 
@@ -300,45 +302,52 @@ void ReadCosmicTracks::makeResiduals(const TrajectorySeed& seed,
   theFitter=        new KFTrajectoryFitter(*thePropagator,
 					   *theUpdator,	
 					   *theEstimator) ;
-//   theSmoother=      new KFTrajectorySmoother(*thePropagatorOp,
-// 					     *theUpdator,	
-// 					     *theEstimator);
+  theSmoother=      new KFTrajectorySmoother(*thePropagatorOp,
+ 					     *theUpdator,	
+ 					     *theEstimator);
  
-  TSOS startingState=startingTSOS(seed);
-  
-  //  if (seed_plus) stable_sort(hits.begin(),hits.end(),CompareHitY_plus(*tracker));
-  //RC edm::OwnVector<const TransientTrackingRecHit> trans_hits;
+  TransientTrackingRecHit::RecHitPointer recHit = RHBuilder->build(&(*(seed.recHits().first)));
+  const GeomDet* hitGeomDet = (&(*tracker))->idToDet( recHit->geographicalId());
+  TSOS invalidState( new BasicSingleTrajectoryState( hitGeomDet->surface()));
+  PTrajectoryStateOnDet pState( seed.startingState());
+  TSOS  State= tsTransform.transientState( pState, &(hitGeomDet->surface()), 
+					   &(*magfield));
+  Trajectory traj( seed, seed.direction());
+  traj.push(TrajectoryMeasurement(invalidState,State,recHit));
+
+
+ 
   TransientTrackingRecHit::RecHitContainer trans_hits;
-  for (unsigned int icosmhit=hits.size()-1;icosmhit>0;icosmhit--){
-    //RC TransientTrackingRecHit* tmphit=RHBuilder->build(&(hits[icosmhit]));
+  for (unsigned int icosmhit=0;icosmhit<hits.size();icosmhit++){
+
     TransientTrackingRecHit::RecHitPointer tmphit=RHBuilder->build(&(hits[icosmhit]));
     trans_hits.push_back(&(*tmphit));
-
+    if (icosmhit>0){
+      TSOS prSt= thePropagator->propagate(traj.lastMeasurement().updatedState(),
+					  tracker->idToDet(hits[icosmhit].geographicalId())->surface());
+      TSOS UpdatedState= theUpdator->update( prSt, *tmphit);
+      traj.push(TrajectoryMeasurement(prSt,UpdatedState,tmphit
+				      ,theEstimator->estimate(prSt, *tmphit).second ));
+    }
   }
-  //RC TransientTrackingRecHit* tmphit=RHBuilder->build(&(hits[0]));
-  TransientTrackingRecHit::RecHitPointer tmphit=RHBuilder->build(&(hits[0]));
-  trans_hits.push_back(&(*tmphit));
-
-  //  for (edm::OwnVector<const TransientTrackingRecHit>::const_iterator itp=trans_hits.begin();
-  //    itp!=trans_hits.end();itp++)  cout<<(*itp).globalPosition()<<endl;
+  TSOS startingState=  TrajectoryStateWithArbitraryError()
+    (thePropagatorOp->propagate(traj.lastMeasurement().updatedState(),
+				tracker->idToDet((*trans_hits.begin())->geographicalId())->surface()));
   const Trajectory ifitted= *(theFitter->fit(seed,trans_hits,startingState).begin());
-  // cout<<"CHI2 "<<ifitted.chiSquared()<<endl;
-  //  const Trajectory ismoothed=*(theSmoother->trajectories(ifitted).begin());
-  // cout<<"CHI3 "<<ismoothed.chiSquared()<<endl;
-  std::vector<TrajectoryMeasurement> TMeas=ifitted.measurements();
-  //  cout<<"TM "<<TMeas.size()<<endl;
-  vector<TrajectoryMeasurement>::iterator itm;
-  for (itm=TMeas.begin();itm!=TMeas.end();itm++){
-    MeasurementExtractor me((*itm).updatedState());
-    AlgebraicVector r((*itm).recHit()->parameters() - me.measuredParameters(*(*itm).recHit()));  
-    unsigned int subid=(*itm).recHit()->geographicalId().subdetId();
-    if    (subid==  StripSubdetector::TIB) hresTIB->Fill(r[0]);
-    if    (subid==  StripSubdetector::TOB) hresTOB->Fill(r[0]);
-    if    (subid==  StripSubdetector::TID) hresTID->Fill(r[0]);
-    if    (subid==  StripSubdetector::TEC) hresTEC->Fill(r[0]);
-    //cout<<r<<" "<<r[0]<<endl;
-    //  cout<<"tm "<<(*itm).updatedState().globalPosition()<<" "<<(*itm).recHit()->globalPosition()<<endl;
-  }
+  const Trajectory smooth=*(theSmoother->trajectories(ifitted).begin());
+
+   std::vector<TrajectoryMeasurement> TMeas=smooth.measurements();
+   vector<TrajectoryMeasurement>::iterator itm;
+   for (itm=TMeas.begin();itm!=TMeas.end();itm++){
+     TrajectoryMeasurementResidual*  TMR=new TrajectoryMeasurementResidual(*itm);
+//     if    (subid==  StripSubdetector::TIB) hresTIB->Fill(r[0]);
+//     if    (subid==  StripSubdetector::TOB) hresTOB->Fill(r[0]);
+//     if    (subid==  StripSubdetector::TID) hresTID->Fill(r[0]);
+//     if    (subid==  StripSubdetector::TEC) hresTEC->Fill(r[0]);
+//     //cout<<r<<" "<<r[0]<<endl;
+//     //  cout<<"tm "<<(*itm).updatedState().globalPosition()<<" "<<(*itm).recHit()->globalPosition()<<endl;
+     delete TMR;
+   }
 
 
 }
