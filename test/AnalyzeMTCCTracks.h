@@ -39,11 +39,15 @@ typedef TrajectoryStateOnSurface     TSOS;
 		     const TrackingRecHitCollection &hits,
 		     const edm::Event& e, 
 		     const edm::EventSetup& es);
+
+  std::vector<TrajectoryMeasurement> seedMeasurements(const TrajectorySeed& seed) const;
+  TrajectoryStateOnSurface startingTSOS(const TrajectorySeed& seed)const;
+  Trajectory createStartingTrajectory( const TrajectorySeed& seed) const;
  private:
   edm::ParameterSet conf_;
 
   TFile* hFile;
-  TH1F  *hphi, *hnhit,*hchi;
+  TH1F  *hphi, *hnhit,*hchi,*hresTOB,*hresTIB,*heta;
   bool seed_plus;
   PropagatorWithMaterial  *thePropagator;
   PropagatorWithMaterial  *thePropagatorOp;

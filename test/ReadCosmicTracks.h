@@ -52,7 +52,10 @@ class ReadCosmicTracks : public edm::EDAnalyzer
 		     const TrackingRecHitCollection & hits,
 		     const edm::Event& e, 
 		     const edm::EventSetup& es);
-  TSOS startingTSOS(const TrajectorySeed& seed)const;
+
+  std::vector<TrajectoryMeasurement> seedMeasurements(const TrajectorySeed& seed) const;
+  TrajectoryStateOnSurface startingTSOS(const TrajectorySeed& seed)const;
+  Trajectory createStartingTrajectory( const TrajectorySeed& seed) const;
  private:
   edm::ParameterSet conf_;
   std::vector<PSimHit> theStripHits;

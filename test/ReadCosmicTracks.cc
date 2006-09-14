@@ -274,12 +274,11 @@ void ReadCosmicTracks::makeResiduals(const TrajectorySeed& seed,
 				     const edm::EventSetup& es){
 
 
-
   //services
   es.get<IdealMagneticFieldRecord>().get(magfield);
   es.get<TrackerDigiGeometryRecord>().get(tracker);
   
- 
+  bool  seed_plus=(seed.direction()==alongMomentum);
   
   if (seed_plus) { 	 
     thePropagator=      new PropagatorWithMaterial(alongMomentum,0.1057,&(*magfield) ); 	 
@@ -306,48 +305,61 @@ void ReadCosmicTracks::makeResiduals(const TrajectorySeed& seed,
  					     *theUpdator,	
  					     *theEstimator);
  
-  TransientTrackingRecHit::RecHitPointer recHit = RHBuilder->build(&(*(seed.recHits().first)));
-  const GeomDet* hitGeomDet = (&(*tracker))->idToDet( recHit->geographicalId());
-  TSOS invalidState( new BasicSingleTrajectoryState( hitGeomDet->surface()));
-  PTrajectoryStateOnDet pState( seed.startingState());
-  TSOS  State= tsTransform.transientState( pState, &(hitGeomDet->surface()), 
-					   &(*magfield));
-  Trajectory traj( seed, seed.direction());
-  traj.push(TrajectoryMeasurement(invalidState,State,recHit));
+  
 
-
- 
+  Trajectory traj=createStartingTrajectory(*(&seed));
   TransientTrackingRecHit::RecHitContainer trans_hits;
-  for (unsigned int icosmhit=0;icosmhit<hits.size();icosmhit++){
-
+  for (unsigned int icosmhit=hits.size()-1;icosmhit+1>0;icosmhit--){
     TransientTrackingRecHit::RecHitPointer tmphit=RHBuilder->build(&(hits[icosmhit]));
+
     trans_hits.push_back(&(*tmphit));
-    if (icosmhit>0){
-      TSOS prSt= thePropagator->propagate(traj.lastMeasurement().updatedState(),
-					  tracker->idToDet(hits[icosmhit].geographicalId())->surface());
-      TSOS UpdatedState= theUpdator->update( prSt, *tmphit);
-      traj.push(TrajectoryMeasurement(prSt,UpdatedState,tmphit
-				      ,theEstimator->estimate(prSt, *tmphit).second ));
+    if (icosmhit<hits.size()-1){
+      TSOS prSt= 
+	thePropagator->propagate(traj.lastMeasurement().updatedState(),
+				 tracker->idToDet(hits[icosmhit].geographicalId())->surface());
+      if (prSt.isValid()){
+	traj.push(TrajectoryMeasurement(prSt,
+					theUpdator->update( prSt, *tmphit),
+					tmphit,
+					theEstimator->estimate(prSt, *tmphit).second));
+      }
+      
     }
   }
-  TSOS startingState=  TrajectoryStateWithArbitraryError()
-    (thePropagatorOp->propagate(traj.lastMeasurement().updatedState(),
-				tracker->idToDet((*trans_hits.begin())->geographicalId())->surface()));
-  const Trajectory ifitted= *(theFitter->fit(seed,trans_hits,startingState).begin());
-  const Trajectory smooth=*(theSmoother->trajectories(ifitted).begin());
 
-   std::vector<TrajectoryMeasurement> TMeas=smooth.measurements();
-   vector<TrajectoryMeasurement>::iterator itm;
-   for (itm=TMeas.begin();itm!=TMeas.end();itm++){
-     TrajectoryMeasurementResidual*  TMR=new TrajectoryMeasurementResidual(*itm);
-//     if    (subid==  StripSubdetector::TIB) hresTIB->Fill(r[0]);
-//     if    (subid==  StripSubdetector::TOB) hresTOB->Fill(r[0]);
-//     if    (subid==  StripSubdetector::TID) hresTID->Fill(r[0]);
-//     if    (subid==  StripSubdetector::TEC) hresTEC->Fill(r[0]);
-//     //cout<<r<<" "<<r[0]<<endl;
-//     //  cout<<"tm "<<(*itm).updatedState().globalPosition()<<" "<<(*itm).recHit()->globalPosition()<<endl;
-     delete TMR;
-   }
+  if (thePropagatorOp->propagate(traj.lastMeasurement().updatedState(),
+				 tracker->idToDet((*trans_hits.begin())->geographicalId())->surface()).isValid()){
+
+    TSOS startingState=  TrajectoryStateWithArbitraryError()
+      (thePropagatorOp->propagate(traj.lastMeasurement().updatedState(),
+				  tracker->idToDet((*trans_hits.begin())->geographicalId())->surface()));
+
+    const Trajectory ifitted= *(theFitter->fit(seed,trans_hits,startingState).begin());
+  
+    const Trajectory smooth=*(theSmoother->trajectories(ifitted).begin());
+    
+
+    std::vector<TrajectoryMeasurement> TMeas=smooth.measurements();
+    vector<TrajectoryMeasurement>::iterator itm;
+    for (itm=TMeas.begin();itm!=TMeas.end();itm++){
+      TrajectoryMeasurementResidual*  TMR=new TrajectoryMeasurementResidual(*itm);
+      StripSubdetector iid=StripSubdetector((*itm).recHit()->detUnit()->geographicalId().rawId());
+      unsigned int subid=iid.subdetId();
+      if    (subid==  StripSubdetector::TID) hresTID->Fill(TMR->measurementXResidual());
+      if    (subid==  StripSubdetector::TEC) hresTEC->Fill(TMR->measurementXResidual());
+      if    (subid==  StripSubdetector::TIB) hresTIB->Fill(TMR->measurementXResidual());
+      if    (subid==  StripSubdetector::TOB) hresTOB->Fill(TMR->measurementXResidual());
+      delete TMR;
+    }
+   
+  }
+  delete thePropagator;
+  delete thePropagatorOp;
+  delete theUpdator;
+  delete theEstimator;
+  delete theFitter;
+  delete theSmoother;
+
 
 
 }
@@ -379,6 +391,7 @@ void ReadCosmicTracks::endJob(){
   hFile->Write();
   hFile->Close();
 }
+
 TrajectoryStateOnSurface
 ReadCosmicTracks::startingTSOS(const TrajectorySeed& seed)const
 {
@@ -389,3 +402,42 @@ ReadCosmicTracks::startingTSOS(const TrajectorySeed& seed)const
   return State;
 
 }
+Trajectory ReadCosmicTracks::createStartingTrajectory( const TrajectorySeed& seed) const
+{
+  Trajectory result( seed, seed.direction());
+  std::vector<TrajectoryMeasurement> seedMeas = seedMeasurements(seed);
+  if ( !seedMeas.empty()) {
+    for (std::vector<TrajectoryMeasurement>::const_iterator i=seedMeas.begin(); i!=seedMeas.end(); i++){
+      result.push(*i);
+    }
+  }
+ 
+  return result;
+}
+
+
+std::vector<TrajectoryMeasurement> 
+ReadCosmicTracks::seedMeasurements(const TrajectorySeed& seed) const
+{
+  std::vector<TrajectoryMeasurement> result;
+  TrajectorySeed::range hitRange = seed.recHits();
+  for (TrajectorySeed::const_iterator ihit = hitRange.first; 
+       ihit != hitRange.second; ihit++) {
+    //RC TransientTrackingRecHit* recHit = RHBuilder->build(&(*ihit));
+    TransientTrackingRecHit::RecHitPointer recHit = RHBuilder->build(&(*ihit));
+    const GeomDet* hitGeomDet = (&(*tracker))->idToDet( ihit->geographicalId());
+    TSOS invalidState( new BasicSingleTrajectoryState( hitGeomDet->surface()));
+
+    if (ihit == hitRange.second - 1) {
+      TSOS  updatedState=startingTSOS(seed);
+      result.push_back(TrajectoryMeasurement( invalidState, updatedState, recHit));
+
+    } 
+    else {
+      result.push_back(TrajectoryMeasurement( invalidState, recHit));
+    }
+    
+  }
+
+  return result;
+};

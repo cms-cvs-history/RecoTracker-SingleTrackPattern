@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "RecoTracker/SingleTrackPattern/test/AnalyzeMTCCTracks.h"
-
+#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/TrajectorySeed/interface/TrajectorySeedCollection.h"
 #include "FWCore/Framework/interface/Handle.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -32,9 +32,12 @@ AnalyzeMTCCTracks::AnalyzeMTCCTracks(edm::ParameterSet const& conf) :
 }
 void AnalyzeMTCCTracks::beginJob(const edm::EventSetup& c){
   hFile = new TFile ( "trackhisto.root", "RECREATE" );
-  hphi = new TH1F("hphi","Phi distribution",20,-3.14,3.14);
-  hnhit = new TH1F("hnhit","Number of Hits per Track ",5,2.5,7.5);
-  hchi = new TH1F("hchi","Chi squared of the track",100,0,100);
+  hphi = new     TH1F("hphi",    "Phi distribution",         100,-3.14,  3.14);
+  heta = new     TH1F("heta",    "Eta distribution",         100,  -5.,  5.   ); 
+  hnhit = new    TH1F("hnhit",   "Number of Hits per Track ", 15,  2.5, 17.5  );
+  hchi = new     TH1F("hchi",    "Chi squared of the track", 300,    0, 60    );
+  hresTIB = new  TH1F("hresTIB", "TIB residual",             300, -1.5,  1.5  );
+  hresTOB = new  TH1F("hresTOB", "TOB residual",             300, -1.5,  1.5  );
 }
 // Virtual destructor needed.
 AnalyzeMTCCTracks::~AnalyzeMTCCTracks() {  }  
@@ -43,7 +46,7 @@ AnalyzeMTCCTracks::~AnalyzeMTCCTracks() {  }
 void AnalyzeMTCCTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
 {
 
-  cout<<"b1"<<endl;
+
   using namespace edm;
   // Step A: Get Inputs 
     edm::Handle<TrajectorySeedCollection> seedcoll;
@@ -60,18 +63,20 @@ void AnalyzeMTCCTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
   es.get<TrackerDigiGeometryRecord>().get(tracker);
  
   const   reco::TrackCollection *tracks=trackCollection.product();
-   cout<<"b2"<<endl;
+
   if (tracks->size()>0){
     reco::TrackCollection::const_iterator ibeg=trackCollection.product()->begin();
     hphi->Fill((*ibeg).outerPhi());
+    heta->Fill((*ibeg).outerEta());
     hnhit->Fill((*ibeg).recHitsSize() );
     hchi->Fill((*ibeg).chi2());
-    cout<<"b3"<<endl;
-    makeResiduals((*(*seedcoll).begin()),
-		  *trackrechitCollection,
-		  e,
-		  es);
-    cout<<"b4"<<endl;
+
+    if  ((*ibeg).chi2()<200)
+      makeResiduals((*(*seedcoll).begin()),
+		    *trackrechitCollection,
+		    e,
+		    es);
+
   }
 }
 void AnalyzeMTCCTracks::endJob(){
@@ -116,88 +121,64 @@ void AnalyzeMTCCTracks::makeResiduals(const TrajectorySeed& seed,
  					     *theUpdator,	
  					     *theEstimator);
  
-  TransientTrackingRecHit::RecHitPointer recHit = RHBuilder->build(&(*(seed.recHits().first)));
-  const GeomDet* hitGeomDet = (&(*tracker))->idToDet( recHit->geographicalId());
-  TSOS invalidState( new BasicSingleTrajectoryState( hitGeomDet->surface()));
-  PTrajectoryStateOnDet pState( seed.startingState());
-  TSOS  State= tsTransform.transientState( pState, &(hitGeomDet->surface()), 
-					   &(*magfield));
-  cout<<"a000"<<endl;
-  //  const  CosmicTrajectoryBuilder *pippo= new  CosmicTrajectoryBuilder(conf_);
-  cout<<"a001"<<endl;
-  Trajectory traj=pippo->createStartingTrajectory(*(&seed));
-  cout<<"a002"<<endl;
-  //  Trajectory traj=CosmicTrajectoryBuilder::createStartingTrajectory(&seed);
-  // Trajectory traj2=CosmicTrajectoryBuilder::createStartingTrajectory(*seed);
-  // Trajectory traj=const CosmicTrajectoryBuilder::createStartingTrajectory(*(&seed));
-  //  const Trajectory traj4=CosmicTrajectoryBuilder::createStartingTrajectory(*(&seed));
-  // Trajectory traj( seed, seed.direction());
-  // cout<<"a1"<<endl;
-  //traj.push(TrajectoryMeasurement(State,recHit));
-  cout<<"a2"<<endl;
-  // traj.push(TrajectoryMeasurement(invalidState,recHit));
-  cout<<"a3"<<endl;
- 
-  TransientTrackingRecHit::RecHitContainer trans_hits;
-  for (unsigned int icosmhit=0;icosmhit<hits.size();icosmhit++){
- 
-    TransientTrackingRecHit::RecHitPointer tmphit=RHBuilder->build(&(hits[icosmhit]));
-    // traj.push(TrajectoryMeasurement(invalidState,tmphit));
-    cout<<"a4"<<endl;
-    trans_hits.push_back(&(*tmphit));
-    if (icosmhit>0){
-      // traj.push(TrajectoryMeasurement(invalidState,tmphit));
-      //  TSOS puppolo =traj.lastMeasurement().updatedState();
-      // cout<<"a5"<<endl;
-      TSOS prSt;
-      if (icosmhit==1)
-	prSt      = thePropagator->propagate(TrajectoryStateWithArbitraryError()(traj.lastMeasurement().updatedState()),
-					     tracker->idToDet(hits[icosmhit].geographicalId())->surface());
-      else  prSt=thePropagator->propagate(traj.lastMeasurement().updatedState(),
-					  tracker->idToDet(hits[icosmhit].geographicalId())->surface());
+  
 
-      cout<<"a6"<<prSt.isValid()<<endl;
-      //      TSOS UpdatedState= theUpdator->update( prSt, *tmphit);
-     //   float chidue=theEstimator->estimate(prSt, *tmphit).second ;
-     cout<<"a7"<<endl;
- //       TrajectoryMeasurement pippo(prSt,
-// 				   theUpdator->update( prSt, *tmphit)
-// 				   ,tmphit,chidue);
-//       cout<<"aa "<<traj.isValid()<<" "<<prSt.isValid()<<" "<<UpdatedState.isValid()<<endl;
-      //      if (traj.isValid())     traj.push(pippo);
-     if (prSt.isValid()){
-       cout<<"DF"<<endl;
-     traj.push(TrajectoryMeasurement(prSt,
-				     theUpdator->update( prSt, *tmphit),
-				     tmphit,
-				     theEstimator->estimate(prSt, *tmphit).second));
-     }
-     // traj.push(TrajectoryMeasurement(invalidState,tmphit));
+  Trajectory traj=createStartingTrajectory(*(&seed));
+  TransientTrackingRecHit::RecHitContainer trans_hits;
+  for (unsigned int icosmhit=hits.size()-1;icosmhit+1>0;icosmhit--){
+    TransientTrackingRecHit::RecHitPointer tmphit=RHBuilder->build(&(hits[icosmhit]));
+
+    trans_hits.push_back(&(*tmphit));
+    if (icosmhit<hits.size()-1){
+      TSOS prSt= 
+	thePropagator->propagate(traj.lastMeasurement().updatedState(),
+				 tracker->idToDet(hits[icosmhit].geographicalId())->surface());
+      if (prSt.isValid()){
+	traj.push(TrajectoryMeasurement(prSt,
+					theUpdator->update( prSt, *tmphit),
+					tmphit,
+					theEstimator->estimate(prSt, *tmphit).second));
+      }
+      
     }
   }
-//   TSOS startingState=  TrajectoryStateWithArbitraryError()
-//     (thePropagatorOp->propagate(traj.lastMeasurement().updatedState(),
-// 				tracker->idToDet((*trans_hits.begin())->geographicalId())->surface()));
-//   const Trajectory ifitted= *(theFitter->fit(seed,trans_hits,startingState).begin());
-//   const Trajectory smooth=*(theSmoother->trajectories(ifitted).begin());
 
-//    std::vector<TrajectoryMeasurement> TMeas=smooth.measurements();
-//    vector<TrajectoryMeasurement>::iterator itm;
-//    for (itm=TMeas.begin();itm!=TMeas.end();itm++){
-//      TrajectoryMeasurementResidual*  TMR=new TrajectoryMeasurementResidual(*itm);
-// //     if    (subid==  StripSubdetector::TIB) hresTIB->Fill(r[0]);
-// //     if    (subid==  StripSubdetector::TOB) hresTOB->Fill(r[0]);
-// //     if    (subid==  StripSubdetector::TID) hresTID->Fill(r[0]);
-// //     if    (subid==  StripSubdetector::TEC) hresTEC->Fill(r[0]);
-// //     //cout<<r<<" "<<r[0]<<endl;
-// //     //  cout<<"tm "<<(*itm).updatedState().globalPosition()<<" "<<(*itm).recHit()->globalPosition()<<endl;
-//      delete TMR;
-//  }
+  if (thePropagatorOp->propagate(traj.lastMeasurement().updatedState(),
+				 tracker->idToDet((*trans_hits.begin())->geographicalId())->surface()).isValid()){
+
+    TSOS startingState=  TrajectoryStateWithArbitraryError()
+      (thePropagatorOp->propagate(traj.lastMeasurement().updatedState(),
+				  tracker->idToDet((*trans_hits.begin())->geographicalId())->surface()));
+
+    const Trajectory ifitted= *(theFitter->fit(seed,trans_hits,startingState).begin());
+  
+    const Trajectory smooth=*(theSmoother->trajectories(ifitted).begin());
+    
+
+    std::vector<TrajectoryMeasurement> TMeas=smooth.measurements();
+    vector<TrajectoryMeasurement>::iterator itm;
+    for (itm=TMeas.begin();itm!=TMeas.end();itm++){
+      TrajectoryMeasurementResidual*  TMR=new TrajectoryMeasurementResidual(*itm);
+      StripSubdetector iid=StripSubdetector((*itm).recHit()->detUnit()->geographicalId().rawId());
+      unsigned int subid=iid.subdetId();
+      
+      if    (subid==  StripSubdetector::TIB) hresTIB->Fill(TMR->measurementXResidual());
+      if    (subid==  StripSubdetector::TOB) hresTOB->Fill(TMR->measurementXResidual());
+      delete TMR;
+    }
+   
+  }
+  delete thePropagator;
+  delete thePropagatorOp;
+  delete theUpdator;
+  delete theEstimator;
+  delete theFitter;
+  delete theSmoother;
 
 
 }
 TrajectoryStateOnSurface
-CosmicTrajectoryBuilder::startingTSOS(const TrajectorySeed& seed)const
+AnalyzeMTCCTracks::startingTSOS(const TrajectorySeed& seed)const
 {
   PTrajectoryStateOnDet pState( seed.startingState());
   const GeomDet* gdet  = (&(*tracker))->idToDet(DetId(pState.detId()));
@@ -206,12 +187,12 @@ CosmicTrajectoryBuilder::startingTSOS(const TrajectorySeed& seed)const
   return State;
 
 }
-Trajectory CosmicTrajectoryBuilder::createStartingTrajectory( const TrajectorySeed& seed) const
+Trajectory AnalyzeMTCCTracks::createStartingTrajectory( const TrajectorySeed& seed) const
 {
   Trajectory result( seed, seed.direction());
-  std::vector<TM> seedMeas = seedMeasurements(seed);
+  std::vector<TrajectoryMeasurement> seedMeas = seedMeasurements(seed);
   if ( !seedMeas.empty()) {
-    for (std::vector<TM>::const_iterator i=seedMeas.begin(); i!=seedMeas.end(); i++){
+    for (std::vector<TrajectoryMeasurement>::const_iterator i=seedMeas.begin(); i!=seedMeas.end(); i++){
       result.push(*i);
     }
   }
@@ -221,7 +202,7 @@ Trajectory CosmicTrajectoryBuilder::createStartingTrajectory( const TrajectorySe
 
 
 std::vector<TrajectoryMeasurement> 
-CosmicTrajectoryBuilder::seedMeasurements(const TrajectorySeed& seed) const
+AnalyzeMTCCTracks::seedMeasurements(const TrajectorySeed& seed) const
 {
   std::vector<TrajectoryMeasurement> result;
   TrajectorySeed::range hitRange = seed.recHits();
@@ -234,11 +215,11 @@ CosmicTrajectoryBuilder::seedMeasurements(const TrajectorySeed& seed) const
 
     if (ihit == hitRange.second - 1) {
       TSOS  updatedState=startingTSOS(seed);
-      result.push_back(TM( invalidState, updatedState, recHit));
+      result.push_back(TrajectoryMeasurement( invalidState, updatedState, recHit));
 
     } 
     else {
-      result.push_back(TM( invalidState, recHit));
+      result.push_back(TrajectoryMeasurement( invalidState, recHit));
     }
     
   }
