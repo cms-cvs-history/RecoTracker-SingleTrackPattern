@@ -38,6 +38,11 @@ void AnalyzeMTCCTracks::beginJob(const edm::EventSetup& c){
   hchi = new     TH1F("hchi",    "Chi squared of the track", 300,    0, 60    );
   hresTIB = new  TH1F("hresTIB", "TIB residual",             300, -1.5,  1.5  );
   hresTOB = new  TH1F("hresTOB", "TOB residual",             300, -1.5,  1.5  );
+  hpt = new      TH1F("hpt"    , "Transv. moment",           100,  0.0,100    );
+  hpx = new      TH1F("hpx"    , "Px",                       100, -50.0,50    );
+  hpy = new      TH1F("hpy"    , "Py",                       100, -50.0,50    );
+  hpz = new      TH1F("hpz"    , "Pz",                       100, -50.0,50    );
+  hq = new       TH1F("hq"     , "charge",                     2, -1.5,  1.5  );
 }
 // Virtual destructor needed.
 AnalyzeMTCCTracks::~AnalyzeMTCCTracks() {  }  
@@ -70,8 +75,13 @@ void AnalyzeMTCCTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
     heta->Fill((*ibeg).outerEta());
     hnhit->Fill((*ibeg).recHitsSize() );
     hchi->Fill((*ibeg).chi2());
+    hpt->Fill((*ibeg).pt());
+    hpx->Fill((*ibeg).px());
+    hpy->Fill((*ibeg).py());
+    hpz->Fill((*ibeg).pz());
+    hq->Fill((*ibeg).charge());
 
-    if  ((*ibeg).chi2()<200)
+    if((*ibeg).chi2()<200)
       makeResiduals((*(*seedcoll).begin()),
 		    *trackrechitCollection,
 		    e,

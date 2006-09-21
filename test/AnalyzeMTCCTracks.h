@@ -47,7 +47,7 @@ typedef TrajectoryStateOnSurface     TSOS;
   edm::ParameterSet conf_;
 
   TFile* hFile;
-  TH1F  *hphi, *hnhit,*hchi,*hresTOB,*hresTIB,*heta;
+  TH1F  *hphi, *hnhit,*hchi,*hresTOB,*hresTIB,*heta,*hpt,*hq,*hpx,*hpy,*hpz;
   bool seed_plus;
   PropagatorWithMaterial  *thePropagator;
   PropagatorWithMaterial  *thePropagatorOp;
