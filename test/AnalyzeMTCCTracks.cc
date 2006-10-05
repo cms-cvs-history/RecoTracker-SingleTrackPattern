@@ -144,12 +144,13 @@ void AnalyzeMTCCTracks::makeResiduals(const TrajectorySeed& seed,
 	thePropagator->propagate(traj.lastMeasurement().updatedState(),
 				 tracker->idToDet(hits[icosmhit].geographicalId())->surface());
       if (prSt.isValid()){
-	traj.push(TrajectoryMeasurement(prSt,
-					theUpdator->update( prSt, *tmphit),
-					tmphit,
-					theEstimator->estimate(prSt, *tmphit).second));
+	if(theUpdator->update( prSt, *tmphit).isValid()){
+	  traj.push(TrajectoryMeasurement(prSt,
+					  theUpdator->update( prSt, *tmphit),
+					  tmphit,
+					  theEstimator->estimate(prSt, *tmphit).second));
+	}
       }
-      
     }
   }
 
@@ -160,23 +161,27 @@ void AnalyzeMTCCTracks::makeResiduals(const TrajectorySeed& seed,
       (thePropagatorOp->propagate(traj.lastMeasurement().updatedState(),
 				  tracker->idToDet((*trans_hits.begin())->geographicalId())->surface()));
 
-    const Trajectory ifitted= *(theFitter->fit(seed,trans_hits,startingState).begin());
-  
-    const Trajectory smooth=*(theSmoother->trajectories(ifitted).begin());
+    std::vector<Trajectory> fittraj=theFitter->fit(seed,trans_hits,startingState);
+    if (fittraj.size()>0){
+      const Trajectory ifitted= *(fittraj.begin());
+      std::vector<Trajectory> smoothtraj=theSmoother->trajectories(ifitted);
+      if (smoothtraj.size()>0){
+	const Trajectory smooth=*(smoothtraj.begin());
     
 
-    std::vector<TrajectoryMeasurement> TMeas=smooth.measurements();
-    vector<TrajectoryMeasurement>::iterator itm;
-    for (itm=TMeas.begin();itm!=TMeas.end();itm++){
-      TrajectoryMeasurementResidual*  TMR=new TrajectoryMeasurementResidual(*itm);
-      StripSubdetector iid=StripSubdetector((*itm).recHit()->detUnit()->geographicalId().rawId());
-      unsigned int subid=iid.subdetId();
-      
-      if    (subid==  StripSubdetector::TIB) hresTIB->Fill(TMR->measurementXResidual());
-      if    (subid==  StripSubdetector::TOB) hresTOB->Fill(TMR->measurementXResidual());
-      delete TMR;
+	std::vector<TrajectoryMeasurement> TMeas=smooth.measurements();
+	vector<TrajectoryMeasurement>::iterator itm;
+	for (itm=TMeas.begin();itm!=TMeas.end();itm++){
+	  TrajectoryMeasurementResidual*  TMR=new TrajectoryMeasurementResidual(*itm);
+	  StripSubdetector iid=StripSubdetector((*itm).recHit()->detUnit()->geographicalId().rawId());
+	  unsigned int subid=iid.subdetId();
+	  
+	  if    (subid==  StripSubdetector::TIB) hresTIB->Fill(TMR->measurementXResidual());
+	  if    (subid==  StripSubdetector::TOB) hresTOB->Fill(TMR->measurementXResidual());
+	  delete TMR;
+	}
+      }
     }
-   
   }
   delete thePropagator;
   delete thePropagatorOp;
