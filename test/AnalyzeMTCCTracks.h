@@ -35,19 +35,21 @@ typedef TrajectoryStateOnSurface     TSOS;
   virtual void beginJob(const edm::EventSetup& c);
   virtual void endJob(); 
   virtual void analyze(const edm::Event& e, const edm::EventSetup& c);
+  void makeResiduals(const Trajectory traj);
   void makeResiduals(const TrajectorySeed& seed,
 		     const TrackingRecHitCollection &hits,
 		     const edm::Event& e, 
 		     const edm::EventSetup& es);
-
+  void AnalHits(const TrackingRecHitCollection &hits);
   std::vector<TrajectoryMeasurement> seedMeasurements(const TrajectorySeed& seed) const;
   TrajectoryStateOnSurface startingTSOS(const TrajectorySeed& seed)const;
   Trajectory createStartingTrajectory( const TrajectorySeed& seed) const;
  private:
   edm::ParameterSet conf_;
-
+  bool ltib1,ltib2,ltob1,ltob2;
+  uint nlay;
   TFile* hFile;
-  TH1F  *hphi, *hnhit,*hchi,*hresTOB,*hresTIB,*heta,*hpt,*hq,*hpx,*hpy,*hpz;
+  TH1F  *hphi, *hnhit,*hchi,*hresTOB,*hresTIB,*hresTOB1,*hresTIB1,*hresTOB2,*hresTIB2,*heta,*hpt,*hq,*hpx,*hpy,*hpz;
   bool seed_plus;
   PropagatorWithMaterial  *thePropagator;
   PropagatorWithMaterial  *thePropagatorOp;
@@ -60,6 +62,7 @@ typedef TrajectoryStateOnSurface     TSOS;
   edm::ESHandle<TrackerGeometry> tracker;
   edm::ESHandle<MagneticField> magfield;
   const  CosmicTrajectoryBuilder *pippo;
+  bool trinevents;
 };
 
 
