@@ -1,4 +1,5 @@
  module cosmictrackfinder= CosmicTrackFinder{
+  bool TrajInEvents=true
   InputTag cosmicSeeds = cosmicseedfinder:
   InputTag matchedRecHits = siStripMatchedRecHits:matchedRecHit
   InputTag rphirecHits    = siStripMatchedRecHits:rphiRecHit
