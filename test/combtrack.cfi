@@ -1,0 +1,5 @@
+module comb = CombTrack{
+    bool TrajInEvents=true
+    InputTag cosmicTkTracks = cosmictrackfindert:
+    InputTag cosmicMuTracks = CosmicMuon:
+        }

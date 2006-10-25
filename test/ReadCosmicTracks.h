@@ -19,9 +19,7 @@
 #include "TrackingTools/KalmanUpdators/interface/KFUpdator.h"
 #include "TrackingTools/KalmanUpdators/interface/Chi2MeasurementEstimator.h"
 #include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHitBuilder.h"
-#include "TrackingTools/TrackFitters/interface/KFTrajectoryFitter.h"
-#include "TrackingTools/TrackFitters/interface/KFTrajectorySmoother.h"
-#include "MagneticField/Engine/interface/MagneticField.h"
+#include "TrackingTools/PatternTools/interface/Trajectory.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 #include <TROOT.h>
@@ -46,16 +44,8 @@ class ReadCosmicTracks : public edm::EDAnalyzer
   virtual ~ReadCosmicTracks();
   virtual void beginJob(const edm::EventSetup& c);
   virtual void endJob(); 
-  virtual void analyze(const edm::Event& e, const edm::EventSetup& c);
- 
-  void makeResiduals(const TrajectorySeed& seed,
-		     const TrackingRecHitCollection & hits,
-		     const edm::Event& e, 
-		     const edm::EventSetup& es);
-
-  std::vector<TrajectoryMeasurement> seedMeasurements(const TrajectorySeed& seed) const;
-  TrajectoryStateOnSurface startingTSOS(const TrajectorySeed& seed)const;
-  Trajectory createStartingTrajectory( const TrajectorySeed& seed) const;
+  virtual void analyze(const edm::Event& e, const edm::EventSetup& c);  
+  void makeResiduals(const Trajectory traj);  
  private:
   edm::ParameterSet conf_;
   std::vector<PSimHit> theStripHits;
@@ -64,7 +54,7 @@ class ReadCosmicTracks : public edm::EDAnalyzer
   TFile* hFile;
   TH1F  *hptres;
   TH1F *hptres1,*hptres2,*hptres3,*hptres4,*hptres5,*hptres6,*hptres7,*hptres8,*hptres9,*hptres10;
- TH1F  *hchiSq;
+  TH1F  *hchiSq;
   TH1F *hchiSq1,*hchiSq2,*hchiSq3,*hchiSq4,*hchiSq5,*hchiSq6,*hchiSq7,*hchiSq8,*hchiSq9,*hchiSq10;
   TH1F  *heffpt,*hrespt,*hchipt,*hchiR;
   TH1F  *heffhit,*hcharge;
@@ -76,15 +66,12 @@ class ReadCosmicTracks : public edm::EDAnalyzer
   float ichiR[10];
   uint iden3[10];
   bool seed_plus;
-  PropagatorWithMaterial  *thePropagator;
-  PropagatorWithMaterial  *thePropagatorOp;
-  KFUpdator *theUpdator;
-  Chi2MeasurementEstimator *theEstimator;
   const TransientTrackingRecHitBuilder *RHBuilder;
-  const KFTrajectorySmoother * theSmoother;
-  const KFTrajectoryFitter * theFitter;
-  TrajectoryStateTransform tsTransform;
   const PSimHit *isim;
+  bool trinevents;
+  bool trackable_cosmic;
+  uint GlobDen;
+  uint GlobNum;
 };
 
 

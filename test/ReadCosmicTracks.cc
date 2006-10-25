@@ -28,6 +28,7 @@ using namespace edm;
 ReadCosmicTracks::ReadCosmicTracks(edm::ParameterSet const& conf) : 
   conf_(conf)
 {
+  trinevents=conf_.getParameter<bool>("TrajInEvents");
 }
 void ReadCosmicTracks::beginJob(const edm::EventSetup& c){
 
@@ -77,6 +78,8 @@ void ReadCosmicTracks::beginJob(const edm::EventSetup& c){
     inum2[ik]=0;
     iden2[ik]=0;
   }
+  GlobDen=0;
+  GlobNum=0;
 }
 // Virtual destructor needed.
 ReadCosmicTracks::~ReadCosmicTracks() {  }  
@@ -84,86 +87,114 @@ ReadCosmicTracks::~ReadCosmicTracks() {  }
 // Functions that gets called by framework every event
 void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
 {
-  
  
-  
+  edm::InputTag seedTag = conf_.getParameter<edm::InputTag>("cosmicSeeds");
+  edm::InputTag TkTag = conf_.getParameter<edm::InputTag>("cosmicTracks");
+  std::string MCTag = conf_.getParameter<std::string>("SimHits");
+
   bool trackable_cosmic=false;
   //SIM HITS
-  theStripHits.clear();
+ 
   edm::Handle<edm::PSimHitContainer> TOBHitsLowTof;
   edm::Handle<edm::PSimHitContainer> TOBHitsHighTof;
   edm::Handle<edm::PSimHitContainer> TIBHitsLowTof;
   edm::Handle<edm::PSimHitContainer> TIBHitsHighTof;
   edm::Handle<edm::PSimHitContainer> PixelBarrelLowTof;
   edm::Handle<edm::PSimHitContainer> PixelBarrelHighTof;
-  
-  e.getByLabel("g4SimHits","TrackerHitsTOBLowTof", TOBHitsLowTof);
-  e.getByLabel("g4SimHits","TrackerHitsTOBHighTof", TOBHitsHighTof);
-  e.getByLabel("g4SimHits","TrackerHitsTIBLowTof", TIBHitsLowTof);
-  e.getByLabel("g4SimHits","TrackerHitsTIBHighTof", TIBHitsHighTof);
-  e.getByLabel("g4SimHits","TrackerHitsPixelBarrelLowTof", PixelBarrelLowTof);
-  e.getByLabel("g4SimHits","TrackerHitsPixelBarrelHighTof", PixelBarrelHighTof);
+ 
+  e.getByLabel(MCTag,"TrackerHitsTOBLowTof", TOBHitsLowTof);
+ 
+  e.getByLabel(MCTag,"TrackerHitsTOBHighTof", TOBHitsHighTof);
+  e.getByLabel(MCTag,"TrackerHitsTIBLowTof", TIBHitsLowTof);
+  e.getByLabel(MCTag,"TrackerHitsTIBHighTof", TIBHitsHighTof);
+  theStripHits.clear();
+//   e.getByLabel(MCTag,"TrackerHitsPixelBarrelLowTof", PixelBarrelLowTof);
+//   e.getByLabel(MCTag,"TrackerHitsPixelBarrelHighTof", PixelBarrelHighTof);
   theStripHits.insert(theStripHits.end(), TOBHitsLowTof->begin(), TOBHitsLowTof->end());
+ 
   theStripHits.insert(theStripHits.end(), TOBHitsHighTof->begin(), TOBHitsHighTof->end());
   theStripHits.insert(theStripHits.end(), TIBHitsLowTof->begin(), TIBHitsLowTof->end());
   theStripHits.insert(theStripHits.end(), TIBHitsHighTof->begin(), TIBHitsHighTof->end());
-  theStripHits.insert(theStripHits.end(), PixelBarrelLowTof->begin(), PixelBarrelLowTof->end());
-  theStripHits.insert(theStripHits.end(), PixelBarrelHighTof->begin(), PixelBarrelHighTof->end());
-
+  //  theStripHits.insert(theStripHits.end(), PixelBarrelLowTof->begin(), PixelBarrelLowTof->end());
+  // theStripHits.insert(theStripHits.end(), PixelBarrelHighTof->begin(), PixelBarrelHighTof->end());
+ 
   //RECONSTRUCTED OBJECTS
   //SEEDS AND TRACKS
   edm::Handle<TrajectorySeedCollection> seedcoll;
-  e.getByType(seedcoll);
+  e.getByLabel(seedTag,seedcoll);
 
-  edm::Handle<reco::TrackCollection> trackCollection;
-  e.getByLabel("cosmictrackfinder",trackCollection);
 
-  edm::Handle<TrackingRecHitCollection> trackrechitCollection;
-  e.getByType(trackrechitCollection);
-
+  edm::Handle<SiStripRecHit2DCollection> rphirecHits;
+  edm::InputTag rphirecHitsTag = conf_.getParameter<edm::InputTag>("rphirecHits");
+  e.getByLabel( rphirecHitsTag ,rphirecHits);
   //TRACKER GEOMETRY
 
   es.get<TrackerDigiGeometryRecord>().get(tracker);
+  edm::ESHandle<TransientTrackingRecHitBuilder> theBuilder;
+  std::string builderName = conf_.getParameter<std::string>("TTRHBuilder");   
+  es.get<TransientRecHitRecord>().get(builderName,theBuilder);  
+  RHBuilder=   theBuilder.product();
 
   //SIMULATED INFORMATION:
   //NUMBER OF SIMHIT ,CHARGE  AND PT
   uint nshit=theStripHits.size();
   stable_sort(theStripHits.begin(),theStripHits.end(),CompareTOF());
   PSimHit isimfirst=(*theStripHits.begin());
+  // PSimHit isimlast=(*(theStripHits.end()-1));
+  PSimHit isimlast=theStripHits.back();
+ 
   int chsim=-1*isimfirst.particleType()/abs(isimfirst.particleType());
   DetId tmp1=DetId(isimfirst.detUnitId());
   GlobalVector gvs= tracker->idToDet(tmp1)->surface().toGlobal(isimfirst.localDirection());
   float ptsims=gvs.perp()*isimfirst.pabs();
-
-
- 
-  //CRITERION TO SAY IF A MUON IS TRACKABLE OR NOT
-  if( (seedcoll.product()->size()>0) &&(nshit>4)) {
-    trackable_cosmic=true;
-    seed_plus=((*(*seedcoll).begin()).direction()==alongMomentum);
-   }
-
   if (nshit>50) nshit=50;
   uint inshit=(nshit/5)-1;
   unsigned int iptsims= uint(ptsims/5 -1);
-  if (iptsims>10) iptsims=10;  
+  if (iptsims>10) iptsims=10; 
+  trackable_cosmic=false;
+  //CRITERION TO SAY IF A MUON IS TRACKABLE OR NOT
+  if( (seedcoll.product()->size()>0) &&(rphirecHits.product()->size()>2) && (rphirecHits.product()->size()<10) ) {
 
-  //INCREASE THE NUMBER OF TRACKABLE MUONS
-  if (trackable_cosmic){
-    iden[iptsims]++;
-    iden2[inshit]++;
+    trackable_cosmic=true;
+    
+    if (trackable_cosmic){
+     
+      SiStripRecHit2DCollection::const_iterator istrip;
+      SiStripRecHit2DCollection stripcoll=*rphirecHits;
+      for(istrip=stripcoll.begin();istrip!=stripcoll.end();istrip++)
+      iden[iptsims]++;
+      iden2[inshit]++;
+      GlobDen++;
+    }
   }
+  edm::Handle<reco::TrackCollection> trackCollection;
+  e.getByLabel(TkTag,trackCollection);
+  edm::Handle<TrackingRecHitCollection> trackerhitCollection;
+  e.getByLabel(TkTag,trackerhitCollection);
+  edm::Handle<std::vector<Trajectory> > TrajectoryCollection;
+  if (trinevents){
+    e.getByLabel(TkTag,TrajectoryCollection);
+  }
+  
+  
+  
+  
+  
   
   //RECONSTRUCTED INFORMATION
   const   reco::TrackCollection *tracks=trackCollection.product();
+  
+  
+  
   //INCREASE THE NUMBER OF TRACKED MUONS
   if (tracks->size()>0){
     reco::TrackCollection::const_iterator ibeg=tracks->begin();
     if (trackable_cosmic) {
       inum[iptsims]++;
       inum2[inshit]++;
-    }
-    
+      GlobNum++;
+    } 
+ 
     GlobalPoint gp((*ibeg).outerPosition().x(),
 		   (*ibeg).outerPosition().y(),
 		   (*ibeg).outerPosition().z());
@@ -172,12 +203,7 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
     float ptrec = (*ibeg).outerPt();
     float chiSquared =(*ibeg).chi2();
     int chrec=(*ibeg).charge();
-    //cout<<"CHI1 "<< chiSquared<<endl;
-    //FILL CHARGE HISTOGRAM 
-    if(chrec==1 && chsim==1) hcharge->Fill(1);
-    if(chrec==-1 && chsim==1) hcharge->Fill(2);
-    if(chrec==-1 && chsim==-1) hcharge->Fill(3);
-    if(chrec==1 && chsim==-1) hcharge->Fill(4);
+  
   
 
     //FIND THE SIMULATED HIT CLOSEST TO THE 
@@ -187,13 +213,21 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
     float MAGR=10000;
     float magmag=10000;
     DetId idet;
+  
+  //    std::cout<<"DELTATOF "<<(*theStripHits.begin())->tof()-
+    //   *(theStripHits.end()-1).tof()<<std::endl;
+    bool tofcorr=(tracker->idToDet(DetId(isimlast.detUnitId()))->surface().
+		  toGlobal(isimlast.localPosition()).y() >
+		  tracker->idToDet(DetId(isimfirst.detUnitId()))->surface().
+		  toGlobal(isimfirst.localPosition()).y())? false:true;
+		  
+
     for (ihit=theStripHits.begin();ihit!=theStripHits.end();ihit++){
       DetId tmp=DetId((*ihit).detUnitId());
       GlobalPoint gp1 =tracker->idToDet(tmp)->surface().toGlobal((*ihit).localPosition());
-
-     float RR=sqrt((gp1.x()*gp1.x())+(gp1.y()*gp1.y()));
+      float RR=sqrt((gp1.x()*gp1.x())+(gp1.y()*gp1.y()));
       if (RR<MAGR) MAGR=RR;
-      if ((gp1-gp).mag()<magmag){
+      if (((gp1-gp).mag()<magmag)&&(abs((*ihit).particleType())==13)){
 	magmag=(gp1-gp).mag();
 	isim=&(*ihit);
 	idet=DetId(tmp);
@@ -207,8 +241,21 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
 
     //REEVALUATION OF THE SIMULATED PT
     GlobalVector gv= tracker->idToDet(idet)->surface().toGlobal(isim->localDirection());
+    if (!tofcorr) {
+      gv=-1*gv;
+      chsim=-1*chsim;
+    }
     float PP=isim->pabs();
     float ptsim=gv.perp()*PP;
+   
+
+
+    //FILL CHARGE HISTOGRAM 
+    if(chrec==1 && chsim==1) hcharge->Fill(1);
+    if(chrec==-1 && chsim==1) hcharge->Fill(2);
+    if(chrec==-1 && chsim==-1) hcharge->Fill(3);
+    if(chrec==1 && chsim==-1) hcharge->Fill(4);
+
     //PT^-1 RESOLUTION
     float ptresrel=((1./ptrec)-(1./ptsim));
     //   if (seed_plus){  
@@ -261,107 +308,25 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
 	hptres10->Fill(ptresrel);
       }
       // }
-  
-      makeResiduals((*(*seedcoll).begin()),
-		    *trackrechitCollection,
-		    e,
-		    es);
+      if (trinevents)
+	makeResiduals(*(TrajectoryCollection.product()->begin()));
+      
   }
 }
-void ReadCosmicTracks::makeResiduals(const TrajectorySeed& seed,
-				     const TrackingRecHitCollection &hits,
-				     const edm::Event& e, 
-				     const edm::EventSetup& es){
+void ReadCosmicTracks::makeResiduals(const Trajectory traj){
 
-
-  //services
-  es.get<IdealMagneticFieldRecord>().get(magfield);
-  es.get<TrackerDigiGeometryRecord>().get(tracker);
-  
-  bool  seed_plus=(seed.direction()==alongMomentum);
-  
-  if (seed_plus) { 	 
-    thePropagator=      new PropagatorWithMaterial(alongMomentum,0.1057,&(*magfield) ); 	 
-    thePropagatorOp=    new PropagatorWithMaterial(oppositeToMomentum,0.1057,&(*magfield) );} 	 
-  else {
-    thePropagator=      new PropagatorWithMaterial(oppositeToMomentum,0.1057,&(*magfield) ); 	
-    thePropagatorOp=    new PropagatorWithMaterial(alongMomentum,0.1057,&(*magfield) );
+  std::vector<TrajectoryMeasurement> TMeas=traj.measurements();
+  vector<TrajectoryMeasurement>::iterator itm;
+  for (itm=TMeas.begin();itm!=TMeas.end();itm++){
+    TrajectoryMeasurementResidual*  TMR=new TrajectoryMeasurementResidual(*itm);
+    StripSubdetector iid=StripSubdetector((*itm).recHit()->detUnit()->geographicalId().rawId());
+    unsigned int subid=iid.subdetId();
+    if    (subid==  StripSubdetector::TID) hresTID->Fill(TMR->measurementXResidual());
+    if    (subid==  StripSubdetector::TEC) hresTEC->Fill(TMR->measurementXResidual());
+    if    (subid==  StripSubdetector::TIB) hresTIB->Fill(TMR->measurementXResidual());
+    if    (subid==  StripSubdetector::TOB) hresTOB->Fill(TMR->measurementXResidual());
+    delete TMR;
   }
-  
-  theUpdator=       new KFUpdator();
-  theEstimator=     new Chi2MeasurementEstimator(30);
-  
-  
-  edm::ESHandle<TransientTrackingRecHitBuilder> theBuilder;
-  std::string builderName = conf_.getParameter<std::string>("TTRHBuilder");   
-  es.get<TransientRecHitRecord>().get(builderName,theBuilder);  
-  RHBuilder=   theBuilder.product();
-
-
-  theFitter=        new KFTrajectoryFitter(*thePropagator,
-					   *theUpdator,	
-					   *theEstimator) ;
-  theSmoother=      new KFTrajectorySmoother(*thePropagatorOp,
- 					     *theUpdator,	
- 					     *theEstimator);
- 
-  
-
-  Trajectory traj=createStartingTrajectory(*(&seed));
-  TransientTrackingRecHit::RecHitContainer trans_hits;
-  for (unsigned int icosmhit=hits.size()-1;icosmhit+1>0;icosmhit--){
-    TransientTrackingRecHit::RecHitPointer tmphit=RHBuilder->build(&(hits[icosmhit]));
-
-    trans_hits.push_back(&(*tmphit));
-    if (icosmhit<hits.size()-1){
-      TSOS prSt= 
-	thePropagator->propagate(traj.lastMeasurement().updatedState(),
-				 tracker->idToDet(hits[icosmhit].geographicalId())->surface());
-      if (prSt.isValid()){
-	traj.push(TrajectoryMeasurement(prSt,
-					theUpdator->update( prSt, *tmphit),
-					tmphit,
-					theEstimator->estimate(prSt, *tmphit).second));
-      }
-      
-    }
-  }
-
-  if (thePropagatorOp->propagate(traj.lastMeasurement().updatedState(),
-				 tracker->idToDet((*trans_hits.begin())->geographicalId())->surface()).isValid()){
-
-    TSOS startingState=  TrajectoryStateWithArbitraryError()
-      (thePropagatorOp->propagate(traj.lastMeasurement().updatedState(),
-				  tracker->idToDet((*trans_hits.begin())->geographicalId())->surface()));
-
-    const Trajectory ifitted= *(theFitter->fit(seed,trans_hits,startingState).begin());
-  
-    const Trajectory smooth=*(theSmoother->trajectories(ifitted).begin());
-    
-
-    std::vector<TrajectoryMeasurement> TMeas=smooth.measurements();
-    vector<TrajectoryMeasurement>::iterator itm;
-    for (itm=TMeas.begin();itm!=TMeas.end();itm++){
-      TrajectoryMeasurementResidual*  TMR=new TrajectoryMeasurementResidual(*itm);
-      StripSubdetector iid=StripSubdetector((*itm).recHit()->detUnit()->geographicalId().rawId());
-      unsigned int subid=iid.subdetId();
-      if    (subid==  StripSubdetector::TID) hresTID->Fill(TMR->measurementXResidual());
-      if    (subid==  StripSubdetector::TEC) hresTEC->Fill(TMR->measurementXResidual());
-      if    (subid==  StripSubdetector::TIB) hresTIB->Fill(TMR->measurementXResidual());
-      if    (subid==  StripSubdetector::TOB) hresTOB->Fill(TMR->measurementXResidual());
-      delete TMR;
-    }
-   
-  }
-  delete thePropagator;
-  delete thePropagatorOp;
-  delete theUpdator;
-  delete theEstimator;
-  delete theFitter;
-  delete theSmoother;
-
-
-
 }
 
 void ReadCosmicTracks::endJob(){
@@ -390,54 +355,7 @@ void ReadCosmicTracks::endJob(){
   //WRITE ROOT FILE
   hFile->Write();
   hFile->Close();
-}
-
-TrajectoryStateOnSurface
-ReadCosmicTracks::startingTSOS(const TrajectorySeed& seed)const
-{
-  PTrajectoryStateOnDet pState( seed.startingState());
-  const GeomDet* gdet  = (&(*tracker))->idToDet(DetId(pState.detId()));
-  TSOS  State= tsTransform.transientState( pState, &(gdet->surface()), 
-					   &(*magfield));
-  return State;
-
-}
-Trajectory ReadCosmicTracks::createStartingTrajectory( const TrajectorySeed& seed) const
-{
-  Trajectory result( seed, seed.direction());
-  std::vector<TrajectoryMeasurement> seedMeas = seedMeasurements(seed);
-  if ( !seedMeas.empty()) {
-    for (std::vector<TrajectoryMeasurement>::const_iterator i=seedMeas.begin(); i!=seedMeas.end(); i++){
-      result.push(*i);
-    }
-  }
- 
-  return result;
-}
-
-
-std::vector<TrajectoryMeasurement> 
-ReadCosmicTracks::seedMeasurements(const TrajectorySeed& seed) const
-{
-  std::vector<TrajectoryMeasurement> result;
-  TrajectorySeed::range hitRange = seed.recHits();
-  for (TrajectorySeed::const_iterator ihit = hitRange.first; 
-       ihit != hitRange.second; ihit++) {
-    //RC TransientTrackingRecHit* recHit = RHBuilder->build(&(*ihit));
-    TransientTrackingRecHit::RecHitPointer recHit = RHBuilder->build(&(*ihit));
-    const GeomDet* hitGeomDet = (&(*tracker))->idToDet( ihit->geographicalId());
-    TSOS invalidState( new BasicSingleTrajectoryState( hitGeomDet->surface()));
-
-    if (ihit == hitRange.second - 1) {
-      TSOS  updatedState=startingTSOS(seed);
-      result.push_back(TrajectoryMeasurement( invalidState, updatedState, recHit));
-
-    } 
-    else {
-      result.push_back(TrajectoryMeasurement( invalidState, recHit));
-    }
-    
-  }
-
-  return result;
 };
+
+
+

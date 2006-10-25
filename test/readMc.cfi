@@ -1,0 +1,8 @@
+module readMc = ReadCosmicTracks{
+    bool TrajInEvents=true
+    InputTag rphirecHits    = siStripMatchedRecHits:rphiRecHit
+    InputTag cosmicSeeds = cosmicseedfindert:
+    InputTag cosmicTracks = cosmictrackfindert:
+    string    SimHits=       "g4SimHits"
+    string TTRHBuilder   =       "WithTrackAngle"
+        }
