@@ -557,4 +557,4 @@ AnalyzeMTCCTracks::seedMeasurements(const TrajectorySeed& seed) const
   }
 
   return result;
-};
+}

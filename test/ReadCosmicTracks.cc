@@ -355,7 +355,7 @@ void ReadCosmicTracks::endJob(){
   //WRITE ROOT FILE
   hFile->Write();
   hFile->Close();
-};
+}
 
 
 
