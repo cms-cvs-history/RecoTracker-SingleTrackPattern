@@ -1,0 +1,2 @@
+module cosmictrackfinderTIF = cosmictrackfinder from "RecoTracker/SingleTrackPattern/data/CosmicTrackFinder.cfi"
+replace cosmictrackfinderTIF.cosmicSeeds  = cosmicseedfinderTIF
