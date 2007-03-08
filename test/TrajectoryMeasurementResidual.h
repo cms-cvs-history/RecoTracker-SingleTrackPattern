@@ -2,8 +2,9 @@
 #define TrajectoryMeasurementResidual_H
 
 #include "TrackingTools/PatternTools/interface/TrajectoryMeasurement.h"
-#include "Geometry/CommonDetAlgo/interface/MeasurementError.h"
-#include "Geometry/CommonDetAlgo/interface/MeasurementVector.h"
+#include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementError.h"
+#include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementVector.h"
+
 class Topology;
 class TransientTrackingRecHit;
 class StripTopology;

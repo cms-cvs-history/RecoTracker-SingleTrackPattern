@@ -8,9 +8,9 @@
 
 #include "RecoTracker/SingleTrackPattern/test/ReadCosmicTracks.h"
 #include "FWCore/Framework/interface/EventSetup.h"
-#include "Geometry/Vector/interface/GlobalPoint.h"
-#include "Geometry/Vector/interface/GlobalVector.h"
-#include "Geometry/Vector/interface/LocalVector.h"
+#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
+#include "DataFormats/GeometryVector/interface/GlobalVector.h"
+#include "DataFormats/GeometryVector/interface/LocalVector.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetType.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
