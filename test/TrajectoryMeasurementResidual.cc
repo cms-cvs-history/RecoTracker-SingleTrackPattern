@@ -3,8 +3,8 @@
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
-//#include "Geometry/CommonDetAlgo/interface/MeasurementVector.h"
-//#include "Geometry/CommonDetAlgo/interface/MeasurementError.h"
+//#include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementVector.h"
+//#include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementError.h"
 #include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementError.h"
 #include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementVector.h"
 using namespace std;
