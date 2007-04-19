@@ -1,6 +1,6 @@
 <use name=FWCore/Framework>
 <use name=DataFormats/Common>
-<use name=RecoTracker/SingleTrackPattern>
+#<use name=RecoTracker/SingleTrackPattern>
 <use name=FWCore/ParameterSet>
 <use name=RecoTracker/TkSeedGenerator>
 <use name=TrackingTools/TrackFitters>
