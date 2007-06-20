@@ -6,7 +6,7 @@
     InputTag stereorecHits  = siStripMatchedRecHits:stereoRecHit
     string HitProducer        = "siStripRecHits"
     int32 MinHits=4
-    double Chi2Cut=1000.
+    double Chi2Cut=40.
     string TTRHBuilder    =   "WithTrackAngle"
     untracked string GeometricStructure  = "MTCC"
     untracked bool debug = true

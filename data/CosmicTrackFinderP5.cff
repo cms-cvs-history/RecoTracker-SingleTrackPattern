@@ -1,0 +1,3 @@
+module cosmictrackfinderP5 = cosmictrackfinder from "RecoTracker/SingleTrackPattern/data/CosmicTrackFinder.cfi"
+replace cosmictrackfinderP5.GeometricStructure = "STANDARD" # is MTCC in CosmicTrackFinder...
+replace cosmictrackfinderP5.cosmicSeeds  = cosmicseedfinderP5
