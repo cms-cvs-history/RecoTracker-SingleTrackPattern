@@ -1,5 +1,6 @@
 #include "RecoTracker/SingleTrackPattern/test/CombTrack.h"
 #include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/TrackReco/interface/TrackExtra.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "TrackingTools/Records/interface/TransientRecHitRecord.h" 
