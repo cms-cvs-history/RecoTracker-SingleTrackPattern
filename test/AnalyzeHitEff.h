@@ -38,6 +38,7 @@
 #include <Riostream.h>
 #include "TRandom2.h"
 
+
 class AnalyzeHitEff : public edm::EDAnalyzer
 {
  public:
@@ -72,6 +73,17 @@ class AnalyzeHitEff : public edm::EDAnalyzer
   TH1F *TIFInvModEffRPhi, *TIFInvModEffRPhi_all, *TIFModEffRPhi;
   TH1F *ResidualXValidSte, *ResidualXValidSte_2;
   TH1F *ResidualXValidRPhi, *ResidualXValidRPhi_2;
+  TH1F *hInvLocYSte,*hInvLocXSte,*hInvLocYSte_Mod,*hInvLocXSte_Mod,*hInvLocYRPhi,*hInvLocXRPhi,*hInvLocYRPhi_Mod,*hInvLocXRPhi_Mod;
+  TH1F *hLocYSte,*hLocXSte,*hLocYRPhi,*hLocXRPhi;
+  TH1F *hTrkphiCKF, *hTrketaCKF, *hTrkchi2CKF,*hTrkchi2Good,*hTrkchi2Bad,*hTrknhitCKF;
+  TH1F *hLocErrYSte,*hLocErrXSte,*hInvLocErrYSte,*hInvLocErrXSte,*hLocErrSte,*hInvLocErrSte;
+  TH1F *hLocErrYRPhi,*hLocErrXRPhi,*hInvLocErrYRPhi,*hInvLocErrXRPhi,*hLocErrRPhi,*hInvLocErrRPhi;
+  TH1F *hdiscr1RPhi, *hdiscr2RPhi, *hInvdiscr1RPhi, *hInvdiscr2RPhi;
+  TH1F *hdiscr1RPhi_log, *hdiscr2RPhi_log, *hInvdiscr1RPhi_log, *hInvdiscr2RPhi_log;
+  TH1F *hdiscr1Ste, *hdiscr2Ste, *hInvdiscr1Ste, *hInvdiscr2Ste;
+  TH1F *hMatchRPhi, *hInvMatchRPhi;
+  TH1F *hHitRPhi, *hInvHitRPhi;
+
 
   // Tree declarations
   // All RecHit

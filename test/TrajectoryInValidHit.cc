@@ -13,6 +13,7 @@
 #include "DataFormats/SiStripDetId/interface/TOBDetId.h"
 #include "Geometry/TrackerGeometryBuilder/interface/GluedGeomDet.h"
 
+
 using namespace std;
 TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, const TrackerGeometry* tracker)
 {
@@ -35,14 +36,14 @@ TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, con
   if (subid ==  StripSubdetector::TIB) { 
     TIBDetId tibid(iidd);
     laytib =tibid.layer();
-    xB = 0.5;
+    xB = 0.3;
     yB = 0.5;
   }
   if (subid ==  StripSubdetector::TOB) { 
     TOBDetId tobid(iidd);
     laytob =tobid.layer();
-    xB = 0.5;
-    yB = 0.5;
+    xB = 0.3;
+    yB = 1.0;
   }
   
 
@@ -84,7 +85,7 @@ TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, con
   }
 
 
-  // Restrict the bounds region for better understanting of the modul assignemnt. 
+  // Restrict the bound regions for better understanding of the modul assignment. 
 
   LocalPoint BoundedPointRphi;
   LocalPoint BoundedPointSte;
@@ -111,7 +112,7 @@ TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, con
   BoundedPointSte = LocalPoint(xSte,ySte,zz);
   
   
-  // ---> RPhi modules 
+  // ---> RPhi Stereo modules 
   if ( monodet->surface().bounds().inside(BoundedPointRphi)) {
     
     RPhilocX = RPhilocX_temp;
@@ -121,7 +122,7 @@ TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, con
     RPhilocX = 2000.;
     RPhilocY = 2000.;
   }
-  // ---> Stereo modules 
+  // ---> TIB Stereo modules 
   if ( stereodet->surface().bounds().inside(BoundedPointSte)) {
     StereolocX = StereolocX_temp;
     StereolocY = StereolocY_temp;
@@ -151,6 +152,14 @@ double TrajectoryInValidHit::localStereoY() const
 double TrajectoryInValidHit::localZ() const
 {
   return theCombinedPredictedState.localPosition().z();
+}
+double TrajectoryInValidHit::localErrorX() const
+{
+  return sqrt(theCombinedPredictedState.localError().positionError().xx());
+}
+double TrajectoryInValidHit::localErrorY() const
+{
+  return sqrt(theCombinedPredictedState.localError().positionError().yy());
 }
 double TrajectoryInValidHit::globalX() const
 {

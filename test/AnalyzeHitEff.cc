@@ -13,8 +13,8 @@
 //  
 //  The code has been tested using a seeding from pairs and only in TIF data. 
 //
-//  For Layer 2,3,4 ---> Select Seed Pairs from TOB (Lay = 7,8,9)
-//  For Layer 5,6,7 ---> Select Seed Pairs From TIB (Lay = 1,2,3) and TOB (Lay = 7,8,9)
+//  For Layer 2,3,4 ---> Select Seed Pairs from TOB (Lay = 8,9,10)
+//  For Layer 5,6,7 ---> Select Seed Pairs From TIB (Lay = 1,2,3) and TOB (Lay = 8,9,10)
 //  For Layer 8,9   ---> Select Seed Pairs From TIB (Lay = 1,2,3)
 //
 //  Change accordly the file in RecoTracker/SpecialSeedGenerators/data/CombinatorialSeedGeneratorForCosmicsTIFTOB.cff
@@ -169,6 +169,71 @@ void AnalyzeHitEff::beginJob(const edm::EventSetup& c){
   ResidualXValidRPhi = new TH1F("ResidualXValidRPhi"," Residual TIB Matched Valid RPhi",100,-0.5,0.5);
   ResidualXValidRPhi_2 = new TH1F("ResidualXValidRPhi_2"," Residual TIB Matched Valid RPhi",100,-1.5,1.5);
 
+  hLocYSte = new TH1F("hLocYSte","   ",100,-12,12.);
+  hLocXSte = new TH1F("hLocXSte","   ",100,-7,7.);
+  hInvLocYSte = new TH1F("hInvLocYSte","   ",100,-12,12.);
+  hInvLocXSte = new TH1F("hInvLocXSte","   ",100,-7,7.);
+  hInvLocYSte_Mod = new TH1F("hInvLocYSte_Mod","   ",100,-12,12.);
+  hInvLocXSte_Mod = new TH1F("hInvLocXSte_Mod","   ",100,-7,7.);
+
+  hLocYRPhi = new TH1F("hLocYRPhi","   ",100,-12,12.);
+  hLocXRPhi = new TH1F("hLocXRPhi","   ",100,-7,7.);
+  hInvLocYRPhi = new TH1F("hInvLocYRPhi","   ",100,-12,12.);
+  hInvLocXRPhi = new TH1F("hInvLocXRPhi","   ",100,-7,7.);
+  hInvLocYRPhi_Mod = new TH1F("hInvLocYRPhi_Mod","   ",100,-12,12.);
+  hInvLocXRPhi_Mod = new TH1F("hInvLocXRPhi_Mod","   ",100,-7,7.);
+
+  hLocErrYSte = new TH1F("hLocErrYSte","   ",200,0,3.);
+  hLocErrXSte = new TH1F("hLocErrXSte","   ",200,0,1.);
+  hInvLocErrYSte = new TH1F("hInvLocErrYSte","   ",200,0,3.);
+  hInvLocErrXSte = new TH1F("hInvLocErrXSte","   ",200,0,1.);
+
+  hLocErrSte = new TH1F("hLocErrSte","   ",200,0,3.);
+  hInvLocErrSte = new TH1F("hInvLocErrSte","   ",200,0,3.);
+
+  hLocErrYRPhi = new TH1F("hLocErrYRPhi","   ",200,0,3.);
+  hLocErrXRPhi = new TH1F("hLocErrXRPhi","   ",200,0,1.);
+  hInvLocErrYRPhi = new TH1F("hInvLocErrYRPhi","   ",200,0,3.);
+  hInvLocErrXRPhi = new TH1F("hInvLocErrXRPhi","   ",200,0,1.);
+
+  hLocErrRPhi = new TH1F("hLocErrRPhi","   ",200,0,3.);
+  hInvLocErrRPhi = new TH1F("hInvLocErrRPhi","   ",200,0,3.);
+
+
+
+  // Basic Track Parameter Histo
+  hTrkphiCKF = new     TH1F("hTrkphiCKF",    "Phi distribution",         100,-3.0, 0.);
+  hTrketaCKF = new     TH1F("hTrketaCKF",    "Eta distribution",         100,  -1.5,  1.5); 
+  hTrkchi2CKF = new     TH1F("hTrkchi2CKF",    "Chi squared of the track", 300,    0, 60    );
+  hTrkchi2Good = new     TH1F("hTrkchi2Good",    "Chi squared of the track", 300,    0, 60    );
+  hTrkchi2Bad = new     TH1F("hTrkchi2Bad",    "Chi squared of the track", 300,    0, 60    );
+  hTrknhitCKF = new    TH1F("hTrknhitCKF",   "Number of Hits per Track ", 20,  2., 22.  );
+
+
+  hdiscr1Ste = new TH1F("hdiscr1Ste"," ",200,0.,10.);
+  hdiscr2Ste = new TH1F("hdiscr2Ste"," ",200,0.,10.);
+  hInvdiscr1Ste = new TH1F("hInvdiscr1Ste"," ",200,0.,10.);
+  hInvdiscr2Ste = new TH1F("hInvdiscr2Ste"," ",200,0.,10.);
+
+  hdiscr1RPhi = new TH1F("hdiscr1RPhi"," ",200,0.,10.);
+  hdiscr2RPhi = new TH1F("hdiscr2RPhi"," ",200,0.,10.);
+  hInvdiscr1RPhi = new TH1F("hInvdiscr1RPhi"," ",200,0.,10.);
+  hInvdiscr2RPhi = new TH1F("hInvdiscr2RPhi"," ",200,0.,10.);
+
+  hdiscr1RPhi_log = new TH1F("hdiscr1RPhi_log"," ",200,0.,3.);
+  hdiscr2RPhi_log = new TH1F("hdiscr2RPhi_log"," ",200,0.,3.);
+  hInvdiscr1RPhi_log = new TH1F("hInvdiscr1RPhi_log"," ",200,0.,3.);
+  hInvdiscr2RPhi_log = new TH1F("hInvdiscr2RPhi_log"," ",200,0.,3.);
+
+
+  hMatchRPhi = new TH1F("hMatchRPhi"," ",6,0,6);
+  hInvMatchRPhi = new TH1F("hInvMatchRPhi"," ",6,0,6);
+
+
+  hHitRPhi = new TH1F("hHitRPhi"," ",14,0,14);
+  hInvHitRPhi = new TH1F("hInvHitRPhi"," ",14,0,14);
+  
+
   events = 0;
   EventSeedCKF = 0;
   EventTrackCKF = 0;
@@ -316,7 +381,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	if(Totlayer  == layers ) {
 	  double prob;
 	  prob = RanGen2.Rndm();
-	  if (prob < 0.5) {    
+	  if (prob > 0.1) {    
 	    vRPhi_SiStripRecHit2D.push_back(hit);
 	  }
 	}
@@ -345,10 +410,25 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
     bool TIBTrigg = false;
     bool TOBTrigg = false;
     EventTrackCKF++;  
+
+    // Basic Track Parameters 
+ 
+
+    hTrkphiCKF->Fill((*iCKF).innerMomentum().phi());
+    hTrketaCKF->Fill((*iCKF).innerMomentum().eta());
+    hTrknhitCKF->Fill((*iCKF).recHitsSize());
+    hTrkchi2CKF->Fill((*iCKF).chi2());
+
+
     // ************ Track Trigger
+    int MatchedHit = 0;
     for (trackingRecHit_iterator itCkf = iCKF->recHitsBegin();  itCkf != iCKF->recHitsEnd(); itCkf++){
 
       if ((*itCkf)->isValid()){
+	const TrackingRecHit* rechit = (*itCkf).get();
+	const SiStripMatchedRecHit2D * matchedhit = dynamic_cast<const SiStripMatchedRecHit2D*>(rechit); 
+	if(matchedhit) MatchedHit++;
+	  
 	uint iidd = (*itCkf)->geographicalId().rawId();
 	StripSubdetector strip=StripSubdetector(iidd);
 	unsigned int subid=strip.subdetId();
@@ -374,7 +454,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	    uint laytib2 =tibid.layer();
 	    std::pair<float,float> monoStereoAng = theAngleFinder->findtrackangle(*itm);
 	    // Trigger on TIB
-	    if (laytib2 == 1) {    // The trigger could be changed in general from TIB lay 3 is ok without any angular restriction. 
+	    if (laytib2 == 1) {    // The trigger could be changed in general from TIB lay 3 is ok withoud any angular restriction. 
 	      AngleLayTIB->Fill(monoStereoAng.first);
 	      if (layers == 2){
 		if (abs(monoStereoAng.first) < 45 )  TIBTrigg = true;
@@ -387,7 +467,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
     }  //   ************ End Track Trigger
 
     int ContTRH = 0;      
-    if (TIBTrigg && TOBTrigg) {
+    if (TIBTrigg && TOBTrigg && MatchedHit > 2) {
       
       EventTriggCKF++; 
 
@@ -398,6 +478,8 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
       double yloc = 0.;
       double xlocSte = 0.;
       double ylocSte = 0.;
+      double xErr = 0.;
+      double yErr = 0.;
       double xglob,yglob,zglob;
 
       for (itm2=TMeas2.begin();itm2!=TMeas2.end();itm2++){
@@ -431,13 +513,6 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 
 	// Modules Constraints
 
-	float YINTCons = 0.;
-	if(TKlayers < 5) {
-	  YINTCons = -1.;
-	}
-	if(TKlayers >= 5) {
-	  YINTCons = 1.0;  // Bonding Region
-	}
 
 	TrajectoryInValidHit*  TM = new TrajectoryInValidHit(*itm2,tkgeom);
 	
@@ -449,9 +524,25 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	xlocSte = TM->localStereoX();
 	ylocSte = TM->localStereoY();
 	
+	xErr =  TM->localErrorX();
+
+	yErr =  TM->localErrorY();
+
+	
 	xglob = TM->globalX();
 	yglob = TM->globalY();
 	zglob = TM->globalZ();
+
+
+	float YINTCons = 0.;
+	if(TKlayers < 5) {
+	  YINTCons = -1.;
+	}
+	if(TKlayers >= 5) {
+	  YINTCons = 1.0;  // Bonding Region
+	}
+
+
 
 	if (layers != TKlayers) {    // Tracking position (just to draw) 
 	  if (ContTRH < 200) {
@@ -466,7 +557,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 
  	if (layers == TKlayers) {   // Look at the layer not used to reconstruct the track
 	  // *************************************  Stereo RecHit Efficiency  *****************************************************
-
+	  
  	  if (IsStereo) {
 	    if (vSte_SiStripRecHit2D.size() > 0) {
 	      std::vector<const SiStripRecHit2D*>::const_iterator HitIterAll = vSte_SiStripRecHit2D.begin();
@@ -482,7 +573,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 		  ContSte++;
 		}
 	      }
-	      // get the closer hit
+	      // Just in case I have more than a rechit on the same module: I get the closer
 	      float FinalResSte;
 	      if (ContSte > 0) {
 		if (ContSte > 1) {
@@ -496,24 +587,68 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	      else {
 		FinalResSte = 1000;
 	      }
+
+	      float discr1 = 0.;
+	      float discr2 = 0.;
 	      
-	    
-	      if ( abs(ylocSte) > YINTCons  && abs(xlocSte) < 1500  ) {  
+	      if (layers < 5) {
+		discr1 = 10.;
+		discr2 = fabs(5.45 - fabs(ylocSte))/yErr;
+	      }
+	      if (layers >= 5) {
+		discr1 = fabs(ylocSte)/yErr ;
+		discr2 = fabs(9.4 - fabs(ylocSte))/yErr;
+	      }  
+
+	      //if ( abs(ylocSte) > YINTCons  && abs(xlocSte) < 1500 ) {  
+	      if ( abs(ylocSte) > YINTCons  && abs(xlocSte) < 1500  && discr1 > 5 && discr2 > 5 ) {  
+		
 		for(uint i=0;i<ActiveLayStereo.size();i++){    
 		  if (iiddStereo == ActiveLayStereo[i] ) { 
 		    ResidualXValidSte->Fill(FinalResSte); 
 		    ResidualXValidSte_2->Fill(FinalResSte); 
-		    if (abs(FinalResSte) < 0.5) {    
+
+		    
+		    if (abs(FinalResSte) < 0.5 ) {    
 		      TIFModEffStereo->Fill(i*1.); 
 		      CKFLayEff->Fill((layers*1.));
+		      hLocYSte->Fill(ylocSte);
+		      hLocXSte->Fill(xlocSte);
+		      
+		      hLocErrYSte->Fill(yErr);
+		      hLocErrXSte->Fill(xErr);
+		      hLocErrSte->Fill(sqrt(xErr*xErr + yErr*yErr));
+
+		      hdiscr1Ste->Fill(discr1);
+		      hdiscr2Ste->Fill(discr2);
+
+		      hTrkchi2Good->Fill((*iCKF).chi2());
 		    }
 		    else {
 		      TIFInvModEffStereo->Fill(i*1.);     
 		      InvCKFLayEff->Fill(layers*1.); 
-		      cout << "######### Invalid Stereo FinalResX " << FinalResSte << " FinalRecHit " << iiddStereo << "   TKlayers  "  <<  TKlayers  << " xlocSte " <<  xlocSte << " ylocSte  " << ylocSte << endl;
+		      cout << "######### Invalid Stereo FinalResX " << FinalResSte << " FinalRecHit " << iiddStereo << "   TKlayers  "  <<  TKlayers  << " xlocSte " <<  xlocSte << " ylocSte  " << ylocSte <<  endl;
+		      cout << " Ste Error " << sqrt(xErr*xErr + yErr*yErr) << " ErrorX " << xErr << " yErr " <<  yErr << " Matched Hit " << MatchedHit <<  endl;
+
+
+		      hInvLocYSte->Fill(ylocSte);
+		      hInvLocXSte->Fill(xlocSte);
+		      hInvLocErrSte->Fill(sqrt(xErr*xErr + yErr*yErr));
+
+		      hTrkchi2Bad->Fill((*iCKF).chi2());
+
+		      hInvdiscr1Ste->Fill(discr1);
+		      hInvdiscr2Ste->Fill(discr2);
+		      hInvLocErrYSte->Fill(yErr);
+		      hInvLocErrXSte->Fill(xErr);
+
 		      if (FinalResSte > 999. ) {
 			TIFInvModEffStereo_all->Fill(i*1.);  
 			cout << " ############  Mod Stereo Not Hit in The Module   ############ " << endl; 
+
+			hInvLocYSte_Mod->Fill(ylocSte);
+			hInvLocXSte_Mod->Fill(xlocSte);
+
 		      }
 		    }
 		  }
@@ -550,22 +685,77 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	    else {
 	      FinalResRPhi = 1000;
 	    }
-	    if ( abs(yloc) > YINTCons && abs(xloc) < 1500 ) { 
+	    float discr1 = 0.;
+	    float discr2 = 0.;
+	    if (layers < 5) {
+	      discr1 = 10.;
+	      discr2 = fabs(5.45 - fabs(yloc))/yErr;
+	    }
+	    if (layers >= 5) {
+	      discr1 = fabs(yloc)/yErr;
+	      discr2 = fabs(9.4 - fabs(yloc))/yErr;
+	    }  
+	    
+	    
+	    if ( abs(yloc) > YINTCons && abs(xloc) < 1500 && discr1 > 5 && discr2 > 5 ) { 
+	    //if ( abs(yloc) > YINTCons && abs(xloc) < 1500 ) { 
 	      for(uint i=0;i < ActiveLayMono.size();i++){   
 		if (iiddMono == ActiveLayMono[i] ) { 
+
 		  ResidualXValidRPhi->Fill(FinalResRPhi); 
-		  ResidualXValidRPhi_2->Fill(FinalResRPhi); 
+		  ResidualXValidRPhi_2->Fill(FinalResRPhi);
+		  
+ 
 		  if (abs(FinalResRPhi) < 0.5) {    
 		    TIFModEffRPhi->Fill(i*1.); 
 		    CKFLayEff->Fill((layers*1.));
+		    hLocYRPhi->Fill(yloc);
+		    hLocXRPhi->Fill(xloc);
+		    
+		    hLocErrYRPhi->Fill(yErr);
+		    hLocErrXRPhi->Fill(xErr);
+		    hLocErrRPhi->Fill(sqrt(xErr*xErr + yErr*yErr));
+		    hTrkchi2Good->Fill((*iCKF).chi2());
+
+		    hdiscr1RPhi->Fill(discr1);
+		    hdiscr2RPhi->Fill(discr2);
+
+		    hdiscr1RPhi_log->Fill(log10(discr1));
+		    hdiscr2RPhi_log->Fill(log10(discr2));
+
+		    hMatchRPhi->Fill(MatchedHit);
+		    hHitRPhi->Fill((*iCKF).recHitsSize());
+		    
+
 		  }
 		  else {
 		    TIFInvModEffRPhi->Fill(i*1.);     
 		    InvCKFLayEff->Fill(layers*1.); 
 		    cout << "######### Invalid RPhi FinalResX " << FinalResRPhi << " FinalRecHit " << iiddMono << "   TKlayers  "  <<  TKlayers  << " xloc " <<  xloc << " yloc  " << yloc << endl;
+		    hInvLocYRPhi->Fill(yloc);
+		    hInvLocXRPhi->Fill(xloc);
+
+		    hInvLocErrYRPhi->Fill(yErr);
+		    hInvLocErrXRPhi->Fill(xErr);
+		    hInvLocErrRPhi->Fill(sqrt(xErr*xErr + yErr*yErr));
+		    hTrkchi2Bad->Fill((*iCKF).chi2());
+
+		    hInvdiscr1RPhi->Fill(discr1);
+		    hInvdiscr2RPhi->Fill(discr2);
+		    
+		    hInvdiscr1RPhi_log->Fill(log10(discr1));
+		    hInvdiscr2RPhi_log->Fill(log10(discr2));
+
+		    cout << " RPhi Error " << sqrt(xErr*xErr + yErr*yErr) << " ErrorX " << xErr << " yErr " <<  yErr << " Matched Hit " << MatchedHit <<  endl;
+
+		    hInvMatchRPhi->Fill(MatchedHit);
+		    hInvHitRPhi->Fill((*iCKF).recHitsSize());
+		    
 		    if (FinalResRPhi > 999. ) {
 		      TIFInvModEffRPhi_all->Fill(i*1.);  
 		      cout << " ############  Mod RPhi Not Hit in The Module   ############ " << endl; 
+		      hInvLocYRPhi_Mod->Fill(yloc);
+		      hInvLocXRPhi_Mod->Fill(xloc);
 		    }
 		  }
 		}

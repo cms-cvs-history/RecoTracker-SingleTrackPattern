@@ -19,6 +19,8 @@ public:
   double localRPhiY() const;
   double localStereoX() const;
   double localStereoY() const;
+  double localErrorX() const;
+  double localErrorY() const;
  
   double localZ() const;
 
