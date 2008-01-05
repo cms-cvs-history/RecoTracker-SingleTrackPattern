@@ -19,11 +19,7 @@
 //
 //  Change accordly the file in RecoTracker/SpecialSeedGenerators/data/CombinatorialSeedGeneratorForCosmicsTIFTOB.cff
 //
-//////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
+///////////////////////////////////////////////////////////////////////////////
 
 #include <memory>
 #include <string>
@@ -57,6 +53,8 @@
 #include "CalibFormats/SiStripObjects/interface/SiStripDetCabling.h"
 #include "DataFormats/SiStripDetId/interface/SiStripSubStructure.h"
 #include "Geometry/TrackerGeometryBuilder/interface/GluedGeomDet.h"
+
+#include "TMath.h"
 
 using namespace std;
 AnalyzeHitEff::AnalyzeHitEff(edm::ParameterSet const& conf) : 
