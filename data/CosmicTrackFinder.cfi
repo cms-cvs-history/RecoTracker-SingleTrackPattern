@@ -8,7 +8,7 @@
 
     string HitProducer        = "siStripRecHits"
     int32 MinHits=4
-    double Chi2Cut= 40.
+    double Chi2Cut= 30.
     string TTRHBuilder    =   "WithTrackAngle"
     untracked string GeometricStructure  = "MTCC"
     untracked bool debug = true
