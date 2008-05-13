@@ -3,9 +3,12 @@
 
    service = RandomNumberGeneratorService
    {
-      untracked uint32 sourceSeed = 135799753
-      PSet moduleSeeds =
-      {
-         untracked uint32 VtxSmeared = 123456789
+      PSet theSource = {
+         untracked uint32 initialSeed = 135799753
+         untracked string engineName = "HepJamesRandom"
+      }
+      PSet VtxSmeared = {
+         untracked uint32 initialSeed = 123456789
+         untracked string engineName = "HepJamesRandom"
       }
    }
