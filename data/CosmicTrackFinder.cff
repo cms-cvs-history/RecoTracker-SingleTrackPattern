@@ -2,7 +2,7 @@
 include "RecoLocalTracker/SiStripRecHitConverter/data/StripCPEfromTrackAngle.cfi"
 # pixelCPE
 include "RecoLocalTracker/SiPixelRecHits/data/PixelCPEParmError.cfi"
-include "RecoTracker/TkSeedGenerator/data/CosmicSeed.cff"
+include "RecoTracker/SpecialSeedGenerators/data/CosmicSeedP5Triplets.cff"
 
 include "RecoTracker/SingleTrackPattern/data/CosmicTrackFinder.cfi"
 
