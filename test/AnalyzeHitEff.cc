@@ -306,8 +306,8 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
   int ContRH = 0;
   vRPhi_SiStripRecHit2D.clear();
   vSte_SiStripRecHit2D.clear();
-  SiStripRecHit2DCollection::const_iterator istripSt;
-  SiStripRecHit2DCollection stripcollSt=*stereorecHits;
+  SiStripRecHit2DCollection::DataContainer::const_iterator istripSt;
+  const SiStripRecHit2DCollection::DataContainer & stripcollSt = stereorecHits->data();
 
   
   if (stereorecHits.product()->size() > 0) {
@@ -336,8 +336,8 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
   
 
   // ************ RPhi RecHit Collection
-  SiStripRecHit2DCollection::const_iterator istrip;
-  SiStripRecHit2DCollection stripcoll=*rphirecHits;
+  SiStripRecHit2DCollection::DataContainer::const_iterator istrip;
+  const SiStripRecHit2DCollection::DataContainer & stripcoll = rphirecHits->data();
   if (rphirecHits.product()->size() > 0) {
     for(istrip=stripcoll.begin();istrip!=stripcoll.end();istrip++) {
       DetId idet=(*istrip).geographicalId();

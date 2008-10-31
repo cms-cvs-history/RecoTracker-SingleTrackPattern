@@ -159,8 +159,8 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
     
     if (trackable_cosmic){
      
-      SiStripRecHit2DCollection::const_iterator istrip;
-      SiStripRecHit2DCollection stripcoll=*rphirecHits;
+      SiStripRecHit2DCollection::DataContainer::const_iterator istrip;
+      SiStripRecHit2DCollection::DataContainer stripcoll=rphirecHits->data();
       for(istrip=stripcoll.begin();istrip!=stripcoll.end();istrip++)
       iden[iptsims]++;
       iden2[inshit]++;
