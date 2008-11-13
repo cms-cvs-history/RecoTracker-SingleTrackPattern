@@ -1,3 +1,0 @@
-module cosmictrackfinderP5 = cosmictrackfinder from "RecoTracker/SingleTrackPattern/data/CosmicTrackFinder.cfi"
-replace cosmictrackfinderP5.GeometricStructure = "STANDARD"
-replace cosmictrackfinderP5.cosmicSeeds  = cosmicseedfinderP5
