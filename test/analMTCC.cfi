@@ -1,5 +1,0 @@
-module analMTCC = AnalyzeMTCCTracks{
-    bool TrajInEvents=true
-    InputTag cosmicSeeds = cosmicseedfindert:
-    InputTag cosmicTracks = cosmictrackfindert:
-    string TTRHBuilder   =       "WithTrackAngle"}
