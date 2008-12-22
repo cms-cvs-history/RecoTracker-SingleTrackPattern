@@ -1,3 +1,0 @@
-module cosmictrackfinderTIFTIB = cosmictrackfinder from "RecoTracker/SingleTrackPattern/data/CosmicTrackFinder.cfi"
-replace cosmictrackfinderTIFTIB.cosmicSeeds  = cosmicseedfinderTIFTIB
-replace cosmictrackfinderTIFTIB.MinHits = 3
