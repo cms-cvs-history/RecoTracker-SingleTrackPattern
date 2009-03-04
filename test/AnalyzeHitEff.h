@@ -46,7 +46,7 @@ class AnalyzeHitEff : public edm::EDAnalyzer
   explicit AnalyzeHitEff(const edm::ParameterSet& conf);
   
   virtual ~AnalyzeHitEff();
-  virtual void beginJob(const edm::EventSetup& c);
+  virtual void beginRun(edm::Run & run, const edm::EventSetup& c);
   virtual void endJob(); 
   virtual void analyze(const edm::Event& e, const edm::EventSetup& c);
 

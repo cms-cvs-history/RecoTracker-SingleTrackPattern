@@ -30,7 +30,7 @@ class LayerFilter : public edm::EDProducer
 
 	virtual ~LayerFilter();
 
-    	virtual void beginJob( const edm::EventSetup& );
+    	virtual void beginRun(edm::Run & run, const edm::EventSetup& );
 
     	virtual void produce(edm::Event& e, const edm::EventSetup& c);
 

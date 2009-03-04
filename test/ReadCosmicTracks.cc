@@ -30,7 +30,7 @@ ReadCosmicTracks::ReadCosmicTracks(edm::ParameterSet const& conf) :
 {
   trinevents=conf_.getParameter<bool>("TrajInEvents");
 }
-void ReadCosmicTracks::beginJob(const edm::EventSetup& c){
+void ReadCosmicTracks::beginRun(edm::Run & run, const edm::EventSetup& c){
 
   //HISTOGRAM BOOKING
   hFile = new TFile ( "ptRes.root", "RECREATE" );

@@ -120,7 +120,7 @@ CombTrack::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 }
 // ------------ method called once each job just before starting event loop  ------------
 void 
-CombTrack::beginJob(const edm::EventSetup&)
+CombTrack::beginRun(edm::Run & run, const edm::EventSetup&)
 {
   hFile = new TFile ( "combtrack.root", "RECREATE" );
   hpt =new TH2F("hpt","pt correlation",25,0,50,25,0,50);

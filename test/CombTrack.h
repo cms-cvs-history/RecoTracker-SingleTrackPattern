@@ -35,7 +35,7 @@ class CombTrack : public edm::EDAnalyzer {
       void AnalHits(const TrackingRecHitCollection &hits, 
 		    const edm::EventSetup&);
  private:
-      virtual void beginJob(const edm::EventSetup&) ;
+      virtual void beginRun(edm::Run & run, const edm::EventSetup&) ;
       virtual void analyze(const edm::Event&, const edm::EventSetup&);
       virtual void endJob() ;
       TFile* hFile;

@@ -32,7 +32,7 @@ AnalyzeMTCCTracks::AnalyzeMTCCTracks(edm::ParameterSet const& conf) :
 {
   trinevents=conf_.getParameter<bool>("TrajInEvents");
 }
-void AnalyzeMTCCTracks::beginJob(const edm::EventSetup& c){
+void AnalyzeMTCCTracks::beginRun(edm::Run & run, const edm::EventSetup& c){
   hFile = new TFile ( "trackhisto.root", "RECREATE" );
   hphi = new     TH1F("hphi",    "Phi distribution",         100,-3.14,  3.14);
   heta = new     TH1F("heta",    "Eta distribution",         100,  -5.,  5.   ); 

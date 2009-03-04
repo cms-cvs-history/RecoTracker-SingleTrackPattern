@@ -43,7 +43,7 @@ class ReadCosmicTracks : public edm::EDAnalyzer
   explicit ReadCosmicTracks(const edm::ParameterSet& conf);
   
   virtual ~ReadCosmicTracks();
-  virtual void beginJob(const edm::EventSetup& c);
+  virtual void beginRun(edm::Run & run, const edm::EventSetup& c);
   virtual void endJob(); 
   virtual void analyze(const edm::Event& e, const edm::EventSetup& c);  
   void makeResiduals(const Trajectory traj);  

@@ -62,7 +62,7 @@ AnalyzeHitEff::AnalyzeHitEff(edm::ParameterSet const& conf) :
 {
   layers =conf_.getParameter<int>("Layer");
 }
-void AnalyzeHitEff::beginJob(const edm::EventSetup& c){
+void AnalyzeHitEff::beginRun(edm::Run & run, const edm::EventSetup& c){
   hFile = new TFile ( "trackeff.root", "RECREATE" );
 
   //Tree
