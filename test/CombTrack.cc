@@ -166,7 +166,7 @@ void CombTrack::AnalHits(const TrackingRecHitCollection &hits,
   TrackingRecHitCollection::const_iterator hit;
   for(hit=hits.begin();hit!=hits.end();hit++){
   
-    uint iid=(*hit).geographicalId().rawId();
+    unsigned int iid=(*hit).geographicalId().rawId();
     int sub=(iid>>25)&0x7 ;
     int lay=(iid>>16) & 0xF;
     if ((lay==1)&&(sub==3)) ltib1=true;

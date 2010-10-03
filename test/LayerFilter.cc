@@ -46,7 +46,7 @@ void LayerFilter::produce(edm::Event& e, const edm::EventSetup& c){
 
 		int toblayer =0;
 		int tiblayer =0;
-		uint TKlayers = 0;
+		unsigned int TKlayers = 0;
 		if (a.subdetId() == 3 ) {
 		  tiblayer = TIBDetId(detId).layer();
 		  TKlayers = tiblayer;

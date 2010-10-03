@@ -68,7 +68,7 @@ void ReadCosmicTracks::beginRun(edm::Run & run, const edm::EventSetup& c){
   hresTEC=new TH1F("hresTEC","residuals for TEC modules",100,-0.05,0.05);
 
   // COUNTERS INITIALIZATION
-  for (uint ik=0;ik<10;ik++){
+  for (unsigned int ik=0;ik<10;ik++){
     inum[ik]=0;
     iden[ik]=0;
     ichiR[ik]=0;
@@ -137,7 +137,7 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
 
   //SIMULATED INFORMATION:
   //NUMBER OF SIMHIT ,CHARGE  AND PT
-  uint nshit=theStripHits.size();
+  unsigned int nshit=theStripHits.size();
   stable_sort(theStripHits.begin(),theStripHits.end(),CompareTOF());
   PSimHit isimfirst=(*theStripHits.begin());
   // PSimHit isimlast=(*(theStripHits.end()-1));
@@ -332,7 +332,7 @@ void ReadCosmicTracks::makeResiduals(const Trajectory traj){
 void ReadCosmicTracks::endJob(){
   //FILL EFFICIENCY vs PT
   //AND CHI2 vs R
-  for  (uint ik=0;ik<10;ik++) {
+  for (unsigned int ik=0;ik<10;ik++) {
     heffpt->Fill(7.5+(ik*5),float(inum[ik])/float(iden[ik]));
     hchiR->Fill(10+(ik*10),ichiR[ik]/float(iden3[ik]));
   }

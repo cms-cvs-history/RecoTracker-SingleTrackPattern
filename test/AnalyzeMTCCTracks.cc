@@ -225,7 +225,7 @@ void AnalyzeMTCCTracks::makeResiduals(const Trajectory traj){
     
     TrajectoryMeasurementResidual*  TMR=new TrajectoryMeasurementResidual(*itm);
     float xres=TMR->measurementXResidual();
-    uint iidd =(*itm).recHit()->detUnit()->geographicalId().rawId();
+    unsigned int iidd =(*itm).recHit()->detUnit()->geographicalId().rawId();
     StripSubdetector iid=StripSubdetector(iidd);
     unsigned int subid=iid.subdetId();
     int lay=(iidd>>16) & 0xF;  int sub=(iidd>>25)&0x7 ;
@@ -464,7 +464,7 @@ void AnalyzeMTCCTracks::makeResiduals(const TrajectorySeed& seed,
 	vector<TrajectoryMeasurement>::iterator itm;
 	for (itm=TMeas.begin();itm!=TMeas.end();itm++){
 	  TrajectoryMeasurementResidual*  TMR=new TrajectoryMeasurementResidual(*itm);
-	  uint iidd =(*itm).recHit()->detUnit()->geographicalId().rawId();
+	  unsigned int iidd =(*itm).recHit()->detUnit()->geographicalId().rawId();
 	  StripSubdetector iid=StripSubdetector(iidd);
 	  unsigned int subid=iid.subdetId();
 	  if    (subid==  StripSubdetector::TIB) hresTIB->Fill(TMR->measurementXResidual());
@@ -522,7 +522,7 @@ void AnalyzeMTCCTracks::AnalHits(const TrackingRecHitCollection &hits){
   TrackingRecHitCollection::const_iterator hit;
   for(hit=hits.begin();hit!=hits.end();hit++){
   
-    uint iid=(*hit).geographicalId().rawId();
+    unsigned int iid=(*hit).geographicalId().rawId();
     int sub=(iid>>25)&0x7 ;
     int lay=(iid>>16) & 0xF;
     if ((lay==1)&&(sub==3)) ltib1=true;

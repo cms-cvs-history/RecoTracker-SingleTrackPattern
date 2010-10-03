@@ -22,7 +22,7 @@ TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, con
 
   theHit = tm.recHit();  
   
-  uint iidd = theHit->geographicalId().rawId();
+  unsigned int iidd = theHit->geographicalId().rawId();
   TrajectoryStateTransform tsostransform;
   PTrajectoryStateOnDet* combinedptsod=tsostransform.persistentState( theCombinedPredictedState,iidd);
   

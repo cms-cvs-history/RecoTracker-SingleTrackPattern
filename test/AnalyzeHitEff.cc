@@ -114,7 +114,7 @@ void AnalyzeHitEff::beginRun(edm::Run & run, const edm::EventSetup& c){
 
     int modulo;
     modulo = (*DetItr)%2;
-    uint TkLayers = 1000;
+    unsigned int TkLayers = 1000;
 
     if(subid ==  StripSubdetector::TIB) { 
       TIBDetId tibid(*DetItr);
@@ -142,7 +142,7 @@ void AnalyzeHitEff::beginRun(edm::Run & run, const edm::EventSetup& c){
 
     
  
-  for (uint i=0;i<ActiveLayStereo.size();i++){
+  for (unsigned int i=0;i<ActiveLayStereo.size();i++){
     out1 << i << "   " << ActiveLayStereo[i] << endl;
   }
   for (uint i=0;i<ActiveLayMono.size();i++){
@@ -317,7 +317,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 
       IsRphiSte = 1;
       DetId idet=(*istripSt).geographicalId();
-      uint idetMod = idet.rawId();
+      unsigned int idetMod = idet.rawId();
       unsigned int subid=idet.subdetId();
       GlobalPoint gpsRec = tracker->idToDet(idet)->surface().toGlobal(istripSt->localPosition());
       if    (subid==  StripSubdetector::TIB || subid==  StripSubdetector::TOB ) {
@@ -341,7 +341,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
   if (rphirecHits.product()->size() > 0) {
     for(istrip=stripcoll.begin();istrip!=stripcoll.end();istrip++) {
       DetId idet=(*istrip).geographicalId();
-      uint idetMod = idet.rawId();
+      unsigned int idetMod = idet.rawId();
       IsRphiSte = 0;
       
       uint toblayer=0;
@@ -427,7 +427,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	const SiStripMatchedRecHit2D * matchedhit = dynamic_cast<const SiStripMatchedRecHit2D*>(rechit); 
 	if(matchedhit) MatchedHit++;
 	  
-	uint iidd = (*itCkf)->geographicalId().rawId();
+	unsigned int iidd = (*itCkf)->geographicalId().rawId();
 	StripSubdetector strip=StripSubdetector(iidd);
 	unsigned int subid=strip.subdetId();
 	if (subid ==  StripSubdetector::TOB) { 
@@ -484,7 +484,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	ConstReferenceCountingPointer<TransientTrackingRecHit> theInHit2;
 	theInHit2 = (*itm2).recHit();
 
-	uint iidd = theInHit2->geographicalId().rawId();
+	unsigned int iidd = theInHit2->geographicalId().rawId();
 	uint iiddStereo, iiddMono;
 
 	StripSubdetector strip=StripSubdetector(iidd);
