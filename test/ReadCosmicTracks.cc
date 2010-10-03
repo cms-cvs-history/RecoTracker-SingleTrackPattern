@@ -74,7 +74,7 @@ void ReadCosmicTracks::beginRun(edm::Run & run, const edm::EventSetup& c){
     ichiR[ik]=0;
     iden3[ik]=0;
   }
-  for (uint ik=0;ik<9;ik++){
+  for (unsigned int ik=0;ik<9;ik++){
     inum2[ik]=0;
     iden2[ik]=0;
   }
@@ -148,8 +148,8 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
   GlobalVector gvs= tracker->idToDet(tmp1)->surface().toGlobal(isimfirst.localDirection());
   float ptsims=gvs.perp()*isimfirst.pabs();
   if (nshit>50) nshit=50;
-  uint inshit=(nshit/5)-1;
-  unsigned int iptsims= uint(ptsims/5 -1);
+  unsigned int inshit=(nshit/5)-1;
+  unsigned int iptsims= (unsigned int)(ptsims/5 -1);
   if (iptsims>10) iptsims=10; 
   trackable_cosmic=false;
   //CRITERION TO SAY IF A MUON IS TRACKABLE OR NOT
@@ -234,7 +234,7 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
       }
     }
 //     //CHI2 vs RADIAL DISTANCE
-    uint iRR=uint(MAGR/10);
+    unsigned int iRR=(unsigned int)(MAGR/10);
     iden3[iRR]++;
     ichiR[iRR]+=chiSquared;
 
@@ -264,7 +264,7 @@ void ReadCosmicTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
     //IN PT BIN
       hptres->Fill(ptresrel);
       hchiSq->Fill(chiSquared);
-      unsigned int iptsim= uint(ptsim/5 -1);
+      unsigned int iptsim= (unsigned int)(ptsim/5 -1);
       if (iptsim>10) iptsim=10;
       
       if (iptsim==1) {
@@ -337,7 +337,7 @@ void ReadCosmicTracks::endJob(){
     hchiR->Fill(10+(ik*10),ichiR[ik]/float(iden3[ik]));
   }
   //FILL EFFICIENCY vs NHIT
-  for  (uint ik=0;ik<9;ik++) {
+  for  (unsigned int ik=0;ik<9;ik++) {
     heffhit->Fill(7.5+(ik*5),float(inum2[ik])/float(iden2[ik]));
   }
   //FILL CHI2 vs PT 

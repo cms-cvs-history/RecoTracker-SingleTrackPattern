@@ -118,13 +118,13 @@ void AnalyzeHitEff::beginRun(edm::Run & run, const edm::EventSetup& c){
 
     if(subid ==  StripSubdetector::TIB) { 
       TIBDetId tibid(*DetItr);
-      uint laytib = 0;
+      unsigned int laytib = 0;
       laytib = tibid.layer();
       TkLayers = laytib;
     }
    if(subid ==  StripSubdetector::TOB) { 
       TOBDetId tobid(*DetItr);
-      uint laytob = 0;
+      unsigned int laytob = 0;
       laytob =tobid.layer();
       TkLayers = laytob + 4;
    }
@@ -145,7 +145,7 @@ void AnalyzeHitEff::beginRun(edm::Run & run, const edm::EventSetup& c){
   for (unsigned int i=0;i<ActiveLayStereo.size();i++){
     out1 << i << "   " << ActiveLayStereo[i] << endl;
   }
-  for (uint i=0;i<ActiveLayMono.size();i++){
+  for (unsigned int i=0;i<ActiveLayMono.size();i++){
     out2 << i << "   " << ActiveLayMono[i] << endl;
   }
 
@@ -344,9 +344,9 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
       unsigned int idetMod = idet.rawId();
       IsRphiSte = 0;
       
-      uint toblayer=0;
-      uint tiblayer=0;
-      uint Totlayer=0;
+      unsigned int toblayer=0;
+      unsigned int tiblayer=0;
+      unsigned int Totlayer=0;
       unsigned int subid=idet.subdetId();
       GlobalPoint gpsRec = tracker->idToDet(idet)->surface().toGlobal(istrip->localPosition());
       if    (subid==  StripSubdetector::TIB) {
@@ -432,7 +432,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	unsigned int subid=strip.subdetId();
 	if (subid ==  StripSubdetector::TOB) { 
 	  TOBDetId tobid(iidd);
-	  uint laytob =tobid.layer();
+	  unsigned int laytob =tobid.layer();
 	  // Trigger on TOB
 	  if ( laytob == 6  ||  laytob == 5 ) TOBTrigg = true;
 	}
@@ -444,12 +444,12 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	for (itm = TMeas.begin();itm != TMeas.end(); itm++){
 	  ConstReferenceCountingPointer<TransientTrackingRecHit> theInHit;
 	  theInHit = (*itm).recHit();
-	  uint iidd2 = theInHit->geographicalId().rawId();
+	  unsigned int iidd2 = theInHit->geographicalId().rawId();
 	  StripSubdetector strip2=StripSubdetector(iidd2);
 	  unsigned int subid2=strip2.subdetId();
 	  if (subid2 ==  StripSubdetector::TIB) {
 	    TIBDetId tibid(iidd2);
-	    uint laytib2 =tibid.layer();
+	    unsigned int laytib2 =tibid.layer();
 	    std::pair<float,float> monoStereoAng = theAngleFinder->findtrackangle(*itm);
 	    // Trigger on TIB
 	    if (laytib2 == 1) {    // The trigger could be changed in general from TIB lay 3 is ok withoud any angular restriction. 
@@ -485,11 +485,11 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	theInHit2 = (*itm2).recHit();
 
 	unsigned int iidd = theInHit2->geographicalId().rawId();
-	uint iiddStereo, iiddMono;
+	unsigned int iiddStereo, iiddMono;
 
 	StripSubdetector strip=StripSubdetector(iidd);
 	unsigned int subid=strip.subdetId();
-	uint TKlayers = 0;
+	unsigned int TKlayers = 0;
 	if (subid ==  StripSubdetector::TIB) { 
 	  TIBDetId tibid(iidd);
 	  TKlayers = tibid.layer();
@@ -564,7 +564,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	      float ResRotateX[10];
 	      float ModResRotateX[10];
 	      for(; HitIterAll != vSte_SiStripRecHit2D.end(); HitIterAll++) {
-		uint SteRecHitID = ((*HitIterAll)->geographicalId()).rawId();
+		unsigned int SteRecHitID = ((*HitIterAll)->geographicalId()).rawId();
 		if (SteRecHitID == iiddStereo){
 		  ResRotateX[ContSte] = ((((*HitIterAll)->localPosition().x())) - xlocSte)*(-1.);
 		  ModResRotateX[ContSte] = abs(ResRotateX[ContSte]);
@@ -601,7 +601,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	      //if ( abs(ylocSte) > YINTCons  && abs(xlocSte) < 1500 ) {  
 	      if ( abs(ylocSte) > YINTCons  && abs(xlocSte) < 1500  && discr1 > 5 && discr2 > 5 ) {  
 		
-		for(uint i=0;i<ActiveLayStereo.size();i++){    
+		for(unsigned int i=0;i<ActiveLayStereo.size();i++){    
 		  if (iiddStereo == ActiveLayStereo[i] ) { 
 		    ResidualXValidSte->Fill(FinalResSte); 
 		    ResidualXValidSte_2->Fill(FinalResSte); 
@@ -663,7 +663,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	    float ResX[10];
 	    float ModResX[10];
 	    for(; HitIterAll != vRPhi_SiStripRecHit2D.end(); HitIterAll++) {
-	      uint RPhiRecHitID = ((*HitIterAll)->geographicalId()).rawId();
+	      unsigned int RPhiRecHitID = ((*HitIterAll)->geographicalId()).rawId();
 	      if (RPhiRecHitID == iiddMono) {
 		ResX[ContRPhi] = ( (*HitIterAll)->localPosition().x()) - xloc;
 		ModResX[ContRPhi] = abs(ResX[ContRPhi]);
@@ -697,7 +697,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	    
 	    if ( abs(yloc) > YINTCons && abs(xloc) < 1500 && discr1 > 5 && discr2 > 5 ) { 
 	    //if ( abs(yloc) > YINTCons && abs(xloc) < 1500 ) { 
-	      for(uint i=0;i < ActiveLayMono.size();i++){   
+	      for(unsigned int i=0;i < ActiveLayMono.size();i++){   
 		if (iiddMono == ActiveLayMono[i] ) { 
 
 		  ResidualXValidRPhi->Fill(FinalResRPhi); 

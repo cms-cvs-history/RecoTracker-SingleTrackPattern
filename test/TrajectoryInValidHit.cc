@@ -29,8 +29,8 @@ TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, con
   
   StripSubdetector strip=StripSubdetector(iidd);
   unsigned int subid=strip.subdetId();
-  uint laytib = 1000;
-  uint laytob = 1000;
+  unsigned int laytib = 1000;
+  unsigned int laytob = 1000;
   float xB = 0.; 
   float yB = 0.;
   if (subid ==  StripSubdetector::TIB) { 
