@@ -47,7 +47,7 @@ class CombTrack : public edm::EDAnalyzer {
       edm::ParameterSet conf_;
       const TransientTrackingRecHitBuilder *RHBuilder;
       bool ltib1,ltib2,ltob1,ltob2;
-      uint nlay;
+      unsigned int nlay;
       bool trinevents;
 
       edm::ESHandle<MagneticField> magfield;

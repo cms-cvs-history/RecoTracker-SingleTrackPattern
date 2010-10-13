@@ -35,7 +35,7 @@ class LayerFilter : public edm::EDProducer
     	virtual void produce(edm::Event& e, const edm::EventSetup& c);
 
 	private:
-	uint layers;
+	unsigned int layers;
 	edm::ParameterSet conf_;
 	bool check(const LocalPoint& local, const StripGeomDetUnit* detunit);
 	GlobalPoint toGlobal(const LocalPoint& local, const StripGeomDetUnit* detunit);

@@ -46,7 +46,7 @@ typedef TrajectoryStateOnSurface     TSOS;
  private:
   edm::ParameterSet conf_;
   bool ltib1,ltib2,ltob1,ltob2;
-  uint nlay;
+  unsigned int nlay;
   TFile* hFile;
   TH1F  *hphi, *hnhit,*hchi,*hresTOB,*hresTIB,*hresTOB1,*hresTIB1,*hresTOB2,*hresTIB2,*heta,*hpt,*hq,*hpx,*hpy,*hpz,*hresTOB_4l,*hresTIB_4l,*hresTOB1_4l,*hresTIB1_4l,*hresTOB2_4l,*hresTIB2_4l;
   TH1F *hresTIBL1_int_str1_mod1_ste,*hresTIBL1_int_str1_mod2_ste,*hresTIBL1_int_str1_mod3_ste;

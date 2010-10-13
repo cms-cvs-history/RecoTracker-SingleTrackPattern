@@ -60,19 +60,19 @@ class ReadCosmicTracks : public edm::EDAnalyzer
   TH1F  *heffpt,*hrespt,*hchipt,*hchiR;
   TH1F  *heffhit,*hcharge;
   TH1F  *hresTIB,*hresTOB,*hresTID,*hresTEC;
-  uint inum[10];
-  uint iden[10];
-  uint inum2[9];
-  uint iden2[9];
+  unsigned int inum[10];
+  unsigned int iden[10];
+  unsigned int inum2[9];
+  unsigned int iden2[9];
   float ichiR[10];
-  uint iden3[10];
+  unsigned int iden3[10];
   bool seed_plus;
   const TransientTrackingRecHitBuilder *RHBuilder;
   const PSimHit *isim;
   bool trinevents;
   bool trackable_cosmic;
-  uint GlobDen;
-  uint GlobNum;
+  unsigned int GlobDen;
+  unsigned int GlobNum;
 };
 
 

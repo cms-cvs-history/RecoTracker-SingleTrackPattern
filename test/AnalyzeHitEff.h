@@ -61,7 +61,7 @@ class AnalyzeHitEff : public edm::EDAnalyzer
 
   ofstream out1,out2;
   TrackLocalAngle* theAngleFinder;
-  uint layers;
+  unsigned int layers;
   vector<unsigned int> ActiveLayStereo, ActiveLayMono;
   std::vector<const SiStripRecHit2D*> vRPhi_SiStripRecHit2D;
   std::vector<const SiStripRecHit2D*> vSte_SiStripRecHit2D;
@@ -100,7 +100,7 @@ class AnalyzeHitEff : public edm::EDAnalyzer
   float	TRHgpy[200];
   float	TRHgpz[200];
   int TRHLay[200];
-  uint TRHMod[200];
+  unsigned int TRHMod[200];
 
 };
 
