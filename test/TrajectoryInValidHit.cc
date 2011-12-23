@@ -23,8 +23,8 @@ TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, con
   theHit = tm.recHit();  
   
   unsigned int iidd = theHit->geographicalId().rawId();
-  TrajectoryStateTransform tsostransform;
-  PTrajectoryStateOnDet* combinedptsod=tsostransform.persistentState( theCombinedPredictedState,iidd);
+  
+  PTrajectoryStateOnDet combinedptsod = trajectoryStateTransform::persistentState( theCombinedPredictedState,iidd);
   
   
   StripSubdetector strip=StripSubdetector(iidd);
@@ -57,11 +57,11 @@ TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, con
   if (laytib == 1 || laytib == 2 || laytob == 1 || laytob == 2){
     
     GluedGeomDet * gdet=(GluedGeomDet *)tracker->idToDet(theHit->geographicalId());    
-    GlobalVector gtrkdirco=gdet->toGlobal(combinedptsod->parameters().momentum());
+    GlobalVector gtrkdirco=gdet->toGlobal(combinedptsod.parameters().momentum());
 
     monodet=gdet->monoDet();
     monoco=monodet->toLocal(gtrkdirco);
-    pmonoco=project(gdet,monodet,combinedptsod->parameters().position(),monoco);
+    pmonoco=project(gdet,monodet,combinedptsod.parameters().position(),monoco);
     
  
     RPhilocX_temp = pmonoco.x(); 
@@ -69,7 +69,7 @@ TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, con
      
     stereodet = gdet->stereoDet();
     stereoco=stereodet->toLocal(gtrkdirco);
-    pstereoco=project(gdet,stereodet,combinedptsod->parameters().position(),stereoco);
+    pstereoco=project(gdet,stereodet,combinedptsod.parameters().position(),stereoco);
     
     StereolocX_temp = pstereoco.x(); 
     StereolocY_temp = pstereoco.y(); 
