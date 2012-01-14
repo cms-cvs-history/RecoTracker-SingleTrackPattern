@@ -51,8 +51,7 @@ std::pair<float,float> TrackLocalAngle::findhitcharge(const TrajectoryMeasuremen
   if (matchedhit) { //if matched hit...
 
     // THIS IS THE POINTER TO THE MONO HIT OF A MATCHED HIT 
-    const SiStripRecHit2D *monohit=matchedhit->monoHit();    
-    const SiStripCluster* monocluster = &*(monohit->cluster());
+    const SiStripCluster* monocluster = &matchedhit->monoCluster();
     const std::vector<uint8_t> amplitudesmono( monocluster->amplitudes().begin(),
 						monocluster->amplitudes().end());
     for(size_t ia=0; ia<amplitudesmono.size();ia++)
@@ -61,8 +60,7 @@ std::pair<float,float> TrackLocalAngle::findhitcharge(const TrajectoryMeasuremen
       }
 
     // THIS IS THE POINTER TO THE STEREO HIT OF A MATCHED HIT 
-    const SiStripRecHit2D *stereohit=matchedhit->stereoHit();   
-    const SiStripCluster* stereocluster = &*(stereohit->cluster());
+    const SiStripCluster* stereocluster = &matchedhit->stereoCluster();
     const std::vector<uint8_t> amplitudesstereo( stereocluster->amplitudes().begin(),
 						  stereocluster->amplitudes().end());
     for(size_t ia=0; ia<amplitudesstereo.size();ia++)
