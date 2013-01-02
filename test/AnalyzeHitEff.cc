@@ -45,9 +45,8 @@
 #include "RecoTracker/SingleTrackPattern/interface/CosmicTrajectoryBuilder.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
 #include "RecoTracker/SingleTrackPattern/test/TrajectoryInValidHit.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/IdealGeometryRecord.h"
 
 #include "CalibTracker/Records/interface/SiStripDetCablingRcd.h"
 #include "CalibFormats/SiStripObjects/interface/SiStripDetCabling.h"
@@ -63,6 +62,11 @@ AnalyzeHitEff::AnalyzeHitEff(edm::ParameterSet const& conf) :
   layers =conf_.getParameter<int>("Layer");
 }
 void AnalyzeHitEff::beginRun(edm::Run & run, const edm::EventSetup& c){
+  //Retrieve tracker topology from geometry
+  edm::ESHandle<TrackerTopology> tTopo;
+  c.get<IdealGeometryRecord>().get(tTopo);
+
+
   hFile = new TFile ( "trackeff.root", "RECREATE" );
 
   //Tree
@@ -117,15 +121,15 @@ void AnalyzeHitEff::beginRun(edm::Run & run, const edm::EventSetup& c){
     unsigned int TkLayers = 1000;
 
     if(subid ==  StripSubdetector::TIB) { 
-      TIBDetId tibid(*DetItr);
+      
       unsigned int laytib = 0;
-      laytib = tibid.layer();
+      laytib = tTopo->tibLayer(*DetItr);
       TkLayers = laytib;
     }
    if(subid ==  StripSubdetector::TOB) { 
-      TOBDetId tobid(*DetItr);
+      
       unsigned int laytob = 0;
-      laytob =tobid.layer();
+      laytob =tTopo->tobLayer(*DetItr);
       TkLayers = laytob + 4;
    }
    if (TkLayers  == layers ) {
@@ -244,6 +248,11 @@ AnalyzeHitEff::~AnalyzeHitEff() {  }
 
 void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 {
+  //Retrieve tracker topology from geometry
+  edm::ESHandle<TrackerTopology> tTopo;
+  es.get<IdealGeometryRecord>().get(tTopo);
+
+
 
   using namespace edm;
   // Step A: Get Inputs 
@@ -350,11 +359,11 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
       unsigned int subid=idet.subdetId();
       GlobalPoint gpsRec = tracker->idToDet(idet)->surface().toGlobal(istrip->localPosition());
       if    (subid==  StripSubdetector::TIB) {
-	tiblayer= TIBDetId(idet).layer();
+	tiblayer= tTopo->tibLayer(idet);
 	Totlayer = tiblayer;
       }
       if    (subid==  StripSubdetector::TOB) {
-	toblayer= TOBDetId(idet).layer();
+	toblayer= tTopo->tobLayer(idet);
 	Totlayer = toblayer + 4;
       }
       if    (subid==  StripSubdetector::TIB || subid==  StripSubdetector::TOB ) {
@@ -431,8 +440,8 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	StripSubdetector strip=StripSubdetector(iidd);
 	unsigned int subid=strip.subdetId();
 	if (subid ==  StripSubdetector::TOB) { 
-	  TOBDetId tobid(iidd);
-	  unsigned int laytob =tobid.layer();
+	  
+	  unsigned int laytob =tTopo->tobLayer(iidd);
 	  // Trigger on TOB
 	  if ( laytob == 6  ||  laytob == 5 ) TOBTrigg = true;
 	}
@@ -448,8 +457,8 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	  StripSubdetector strip2=StripSubdetector(iidd2);
 	  unsigned int subid2=strip2.subdetId();
 	  if (subid2 ==  StripSubdetector::TIB) {
-	    TIBDetId tibid(iidd2);
-	    unsigned int laytib2 =tibid.layer();
+	    
+	    unsigned int laytib2 =tTopo->tibLayer(iidd2);
 	    std::pair<float,float> monoStereoAng = theAngleFinder->findtrackangle(*itm);
 	    // Trigger on TIB
 	    if (laytib2 == 1) {    // The trigger could be changed in general from TIB lay 3 is ok withoud any angular restriction. 
@@ -491,12 +500,12 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	unsigned int subid=strip.subdetId();
 	unsigned int TKlayers = 0;
 	if (subid ==  StripSubdetector::TIB) { 
-	  TIBDetId tibid(iidd);
-	  TKlayers = tibid.layer();
+	  
+	  TKlayers = tTopo->tibLayer(iidd);
 	}
 	if (subid ==  StripSubdetector::TOB) { 
-	  TOBDetId tobid(iidd);
-	  TKlayers = tobid.layer() + 4 ; 
+	  
+	  TKlayers = tTopo->tobLayer(iidd) + 4 ; 
 	}
 	bool IsStereo = false;
 	if (TKlayers == 1 || TKlayers == 2 || TKlayers == 5 || TKlayers == 6){    // Stereo layers
@@ -512,7 +521,7 @@ void AnalyzeHitEff::analyze(const edm::Event& e, const edm::EventSetup& es)
 	// Modules Constraints
 
 
-	TrajectoryInValidHit*  TM = new TrajectoryInValidHit(*itm2,tkgeom);
+	TrajectoryInValidHit*  TM = new TrajectoryInValidHit(*itm2,tkgeom,es);
 	
 	// --> Get trajectory from combinatedState 
 	

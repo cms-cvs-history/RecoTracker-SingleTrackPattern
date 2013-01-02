@@ -5,6 +5,8 @@
 #include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementError.h"
 #include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementVector.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+
 
 class Topology;
 class TransientTrackingRecHit;
@@ -13,7 +15,7 @@ class PixelTopology;
 class TrajectoryInValidHit {
 public:
 
-  TrajectoryInValidHit( const TrajectoryMeasurement&, const TrackerGeometry * tracker);
+  TrajectoryInValidHit( const TrajectoryMeasurement&, const TrackerGeometry * tracker, const edm::EventSetup &es);
 
   double localRPhiX() const;
   double localRPhiY() const;

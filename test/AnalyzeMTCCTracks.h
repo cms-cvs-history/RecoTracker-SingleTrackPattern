@@ -33,7 +33,7 @@ typedef TrajectoryStateOnSurface     TSOS;
   virtual void beginRun(edm::Run & run, const edm::EventSetup& c);
   virtual void endJob(); 
   virtual void analyze(const edm::Event& e, const edm::EventSetup& c);
-  void makeResiduals(const Trajectory traj);
+  void makeResiduals(const Trajectory traj, const edm::EventSetup& es);
   void makeResiduals(const TrajectorySeed& seed,
 		     const TrackingRecHitCollection &hits,
 		     const edm::Event& e, 

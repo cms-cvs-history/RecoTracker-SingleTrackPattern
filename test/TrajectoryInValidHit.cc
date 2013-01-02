@@ -8,15 +8,20 @@
 #include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementError.h"
 #include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementVector.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/IdealGeometryRecord.h"
 #include "Geometry/TrackerGeometryBuilder/interface/GluedGeomDet.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 
 
 using namespace std;
-TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, const TrackerGeometry* tracker)
+TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, const TrackerGeometry* tracker,
+					    const edm::EventSetup &es)
 {
+  //Retrieve tracker topology from geometry
+  edm::ESHandle<TrackerTopology> tTopo;
+  es.get<IdealGeometryRecord>().get(tTopo);
+
   theCombinedPredictedState = TrajectoryStateCombiner().combine( tm.forwardPredictedState(),
   								 tm.backwardPredictedState());
 
@@ -34,14 +39,14 @@ TrajectoryInValidHit::TrajectoryInValidHit( const TrajectoryMeasurement& tm, con
   float xB = 0.; 
   float yB = 0.;
   if (subid ==  StripSubdetector::TIB) { 
-    TIBDetId tibid(iidd);
-    laytib =tibid.layer();
+    
+    laytib =tTopo->tibLayer(iidd);
     xB = 0.3;
     yB = 0.5;
   }
   if (subid ==  StripSubdetector::TOB) { 
-    TOBDetId tobid(iidd);
-    laytob =tobid.layer();
+    
+    laytob =tTopo->tobLayer(iidd);
     xB = 0.3;
     yB = 1.0;
   }

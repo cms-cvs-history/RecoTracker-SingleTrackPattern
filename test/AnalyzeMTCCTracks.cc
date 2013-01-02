@@ -24,8 +24,8 @@
 #include "TrackingTools/TrajectoryState/interface/BasicSingleTrajectoryState.h"
 #include "TrackingTools/TrackFitters/interface/TrajectoryStateWithArbitraryError.h"
 #include "RecoTracker/SingleTrackPattern/test/TrajectoryMeasurementResidual.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/IdealGeometryRecord.h"
 using namespace std;
 AnalyzeMTCCTracks::AnalyzeMTCCTracks(edm::ParameterSet const& conf) : 
   conf_(conf)
@@ -204,7 +204,7 @@ void AnalyzeMTCCTracks::analyze(const edm::Event& e, const edm::EventSetup& es)
       if((*ibeg).chi2()<200){
 
 	if (trinevents)
-	  makeResiduals(*(TrajectoryCollection.product()->begin()));
+	  makeResiduals(*(TrajectoryCollection.product()->begin()),es);
 	else
 	  makeResiduals((*(*seedcoll).begin()),
 			*trackerchitCollection,
@@ -218,7 +218,12 @@ void AnalyzeMTCCTracks::endJob(){
   hFile->Write();
   hFile->Close();
 }
-void AnalyzeMTCCTracks::makeResiduals(const Trajectory traj){
+void AnalyzeMTCCTracks::makeResiduals(const Trajectory traj,const edm::EventSetup& es){
+
+  //Retrieve tracker topology from geometry
+  edm::ESHandle<TrackerTopology> tTopo;
+  es.get<IdealGeometryRecord>().get(tTopo);
+
   std::vector<TrajectoryMeasurement> TMeas=traj.measurements();
   vector<TrajectoryMeasurement>::iterator itm;
   for (itm=TMeas.begin();itm!=TMeas.end();itm++){
@@ -232,133 +237,133 @@ void AnalyzeMTCCTracks::makeResiduals(const Trajectory traj){
     
     //TIB
     if(sub==3){
-      TIBDetId tibid(iidd);
-      if (tibid.layer()==1){
-	if((tibid.stereo()==1)&&(tibid.string()[1]==0)){
-	  if((tibid.string()[2]==1)&&(tibid.module()==1))hresTIBL1_int_str1_mod1_ste->Fill(xres);
-	  if((tibid.string()[2]==1)&&(tibid.module()==2))hresTIBL1_int_str1_mod2_ste->Fill(xres);
-	  if((tibid.string()[2]==1)&&(tibid.module()==3))hresTIBL1_int_str1_mod3_ste->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==1))hresTIBL1_int_str2_mod1_ste->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==2))hresTIBL1_int_str2_mod2_ste->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==3))hresTIBL1_int_str2_mod3_ste->Fill(xres);	  
+      
+      if (tTopo->tibLayer(iidd)==1){
+	if((tTopo->tibStereo(iidd)==1)&&(tTopo->tibStringInfo(iidd)[1]==0)){
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==1))hresTIBL1_int_str1_mod1_ste->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==2))hresTIBL1_int_str1_mod2_ste->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==3))hresTIBL1_int_str1_mod3_ste->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==1))hresTIBL1_int_str2_mod1_ste->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==2))hresTIBL1_int_str2_mod2_ste->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==3))hresTIBL1_int_str2_mod3_ste->Fill(xres);	  
 	}
-	if((tibid.stereo()==1)&&(tibid.string()[1]==1)){
-	  if((tibid.string()[2]==1)&&(tibid.module()==1))hresTIBL1_est_str1_mod1_ste->Fill(xres);
-	  if((tibid.string()[2]==1)&&(tibid.module()==2))hresTIBL1_est_str1_mod2_ste->Fill(xres);
-	  if((tibid.string()[2]==1)&&(tibid.module()==3))hresTIBL1_est_str1_mod3_ste->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==1))hresTIBL1_est_str2_mod1_ste->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==2))hresTIBL1_est_str2_mod2_ste->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==3))hresTIBL1_est_str2_mod3_ste->Fill(xres);	  
-	  if((tibid.string()[2]==3)&&(tibid.module()==1))hresTIBL1_est_str3_mod1_ste->Fill(xres);
-	  if((tibid.string()[2]==3)&&(tibid.module()==2))hresTIBL1_est_str3_mod2_ste->Fill(xres);
-	  if((tibid.string()[2]==3)&&(tibid.module()==3))hresTIBL1_est_str3_mod3_ste->Fill(xres);	
+	if((tTopo->tibStereo(iidd)==1)&&(tTopo->tibStringInfo(iidd)[1]==1)){
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==1))hresTIBL1_est_str1_mod1_ste->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==2))hresTIBL1_est_str1_mod2_ste->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==3))hresTIBL1_est_str1_mod3_ste->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==1))hresTIBL1_est_str2_mod1_ste->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==2))hresTIBL1_est_str2_mod2_ste->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==3))hresTIBL1_est_str2_mod3_ste->Fill(xres);	  
+	  if((tTopo->tibStringInfo(iidd)[2]==3)&&(tTopo->tibModule(iidd)==1))hresTIBL1_est_str3_mod1_ste->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==3)&&(tTopo->tibModule(iidd)==2))hresTIBL1_est_str3_mod2_ste->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==3)&&(tTopo->tibModule(iidd)==3))hresTIBL1_est_str3_mod3_ste->Fill(xres);	
 	}
-	if((tibid.stereo()==0)&&(tibid.string()[1]==0)){
-	  if((tibid.string()[2]==1)&&(tibid.module()==1))hresTIBL1_int_str1_mod1_rphi->Fill(xres);
-	  if((tibid.string()[2]==1)&&(tibid.module()==2))hresTIBL1_int_str1_mod2_rphi->Fill(xres);
-	  if((tibid.string()[2]==1)&&(tibid.module()==3))hresTIBL1_int_str1_mod3_rphi->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==1))hresTIBL1_int_str2_mod1_rphi->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==2))hresTIBL1_int_str2_mod2_rphi->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==3))hresTIBL1_int_str2_mod3_rphi->Fill(xres);	  
+	if((tTopo->tibStereo(iidd)==0)&&(tTopo->tibStringInfo(iidd)[1]==0)){
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==1))hresTIBL1_int_str1_mod1_rphi->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==2))hresTIBL1_int_str1_mod2_rphi->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==3))hresTIBL1_int_str1_mod3_rphi->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==1))hresTIBL1_int_str2_mod1_rphi->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==2))hresTIBL1_int_str2_mod2_rphi->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==3))hresTIBL1_int_str2_mod3_rphi->Fill(xres);	  
 	}
-	if((tibid.stereo()==0)&&(tibid.string()[1]==1)){
-	  if((tibid.string()[2]==1)&&(tibid.module()==1))hresTIBL1_est_str1_mod1_rphi->Fill(xres);
-	  if((tibid.string()[2]==1)&&(tibid.module()==2))hresTIBL1_est_str1_mod2_rphi->Fill(xres);
-	  if((tibid.string()[2]==1)&&(tibid.module()==3))hresTIBL1_est_str1_mod3_rphi->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==1))hresTIBL1_est_str2_mod1_rphi->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==2))hresTIBL1_est_str2_mod2_rphi->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==3))hresTIBL1_est_str2_mod3_rphi->Fill(xres);	  
-	  if((tibid.string()[2]==3)&&(tibid.module()==1))hresTIBL1_est_str3_mod1_rphi->Fill(xres);
-	  if((tibid.string()[2]==3)&&(tibid.module()==2))hresTIBL1_est_str3_mod2_rphi->Fill(xres);
-	  if((tibid.string()[2]==3)&&(tibid.module()==3))hresTIBL1_est_str3_mod3_rphi->Fill(xres);	
+	if((tTopo->tibStereo(iidd)==0)&&(tTopo->tibStringInfo(iidd)[1]==1)){
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==1))hresTIBL1_est_str1_mod1_rphi->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==2))hresTIBL1_est_str1_mod2_rphi->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==3))hresTIBL1_est_str1_mod3_rphi->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==1))hresTIBL1_est_str2_mod1_rphi->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==2))hresTIBL1_est_str2_mod2_rphi->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==3))hresTIBL1_est_str2_mod3_rphi->Fill(xres);	  
+	  if((tTopo->tibStringInfo(iidd)[2]==3)&&(tTopo->tibModule(iidd)==1))hresTIBL1_est_str3_mod1_rphi->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==3)&&(tTopo->tibModule(iidd)==2))hresTIBL1_est_str3_mod2_rphi->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==3)&&(tTopo->tibModule(iidd)==3))hresTIBL1_est_str3_mod3_rphi->Fill(xres);	
 	}
       }
 
       //LAYER2      
-      if(tibid.layer()==2){
-	if(tibid.string()[1]==0){
-	  if((tibid.string()[2]==1)&&(tibid.module()==1))hresTIBL2_int_str1_mod1->Fill(xres);
-	  if((tibid.string()[2]==1)&&(tibid.module()==2))hresTIBL2_int_str1_mod2->Fill(xres);
-	  if((tibid.string()[2]==1)&&(tibid.module()==3))hresTIBL2_int_str1_mod3->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==1))hresTIBL2_int_str2_mod1->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==2))hresTIBL2_int_str2_mod2->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==3))hresTIBL2_int_str2_mod3->Fill(xres);
-	  if((tibid.string()[2]==3)&&(tibid.module()==1))hresTIBL2_int_str3_mod1->Fill(xres);
-	  if((tibid.string()[2]==3)&&(tibid.module()==2))hresTIBL2_int_str3_mod2->Fill(xres);
-	  if((tibid.string()[2]==3)&&(tibid.module()==3))hresTIBL2_int_str3_mod3->Fill(xres);
-	  if((tibid.string()[2]==4)&&(tibid.module()==1))hresTIBL2_int_str4_mod1->Fill(xres);
-	  if((tibid.string()[2]==4)&&(tibid.module()==2))hresTIBL2_int_str4_mod2->Fill(xres);
-	  if((tibid.string()[2]==4)&&(tibid.module()==3))hresTIBL2_int_str4_mod3->Fill(xres);
-	  if((tibid.string()[2]==5)&&(tibid.module()==1))hresTIBL2_int_str5_mod1->Fill(xres);
-	  if((tibid.string()[2]==5)&&(tibid.module()==2))hresTIBL2_int_str5_mod2->Fill(xres);
-	  if((tibid.string()[2]==5)&&(tibid.module()==3))hresTIBL2_int_str5_mod3->Fill(xres);
-	  if((tibid.string()[2]==6)&&(tibid.module()==1))hresTIBL2_int_str6_mod1->Fill(xres);
-	  if((tibid.string()[2]==6)&&(tibid.module()==2))hresTIBL2_int_str6_mod2->Fill(xres);
-	  if((tibid.string()[2]==6)&&(tibid.module()==3))hresTIBL2_int_str6_mod3->Fill(xres);
-	  if((tibid.string()[2]==7)&&(tibid.module()==1))hresTIBL2_int_str7_mod1->Fill(xres);
-	  if((tibid.string()[2]==7)&&(tibid.module()==2))hresTIBL2_int_str7_mod2->Fill(xres);
-	  if((tibid.string()[2]==7)&&(tibid.module()==3))hresTIBL2_int_str7_mod3->Fill(xres);
-	  if((tibid.string()[2]==8)&&(tibid.module()==1))hresTIBL2_int_str8_mod1->Fill(xres);
-	  if((tibid.string()[2]==8)&&(tibid.module()==2))hresTIBL2_int_str8_mod2->Fill(xres);
-	  if((tibid.string()[2]==8)&&(tibid.module()==3))hresTIBL2_int_str8_mod3->Fill(xres);
+      if(tTopo->tibLayer(iidd)==2){
+	if(tTopo->tibStringInfo(iidd)[1]==0){
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==1))hresTIBL2_int_str1_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==2))hresTIBL2_int_str1_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==3))hresTIBL2_int_str1_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==1))hresTIBL2_int_str2_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==2))hresTIBL2_int_str2_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==3))hresTIBL2_int_str2_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==3)&&(tTopo->tibModule(iidd)==1))hresTIBL2_int_str3_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==3)&&(tTopo->tibModule(iidd)==2))hresTIBL2_int_str3_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==3)&&(tTopo->tibModule(iidd)==3))hresTIBL2_int_str3_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==4)&&(tTopo->tibModule(iidd)==1))hresTIBL2_int_str4_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==4)&&(tTopo->tibModule(iidd)==2))hresTIBL2_int_str4_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==4)&&(tTopo->tibModule(iidd)==3))hresTIBL2_int_str4_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==5)&&(tTopo->tibModule(iidd)==1))hresTIBL2_int_str5_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==5)&&(tTopo->tibModule(iidd)==2))hresTIBL2_int_str5_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==5)&&(tTopo->tibModule(iidd)==3))hresTIBL2_int_str5_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==6)&&(tTopo->tibModule(iidd)==1))hresTIBL2_int_str6_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==6)&&(tTopo->tibModule(iidd)==2))hresTIBL2_int_str6_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==6)&&(tTopo->tibModule(iidd)==3))hresTIBL2_int_str6_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==7)&&(tTopo->tibModule(iidd)==1))hresTIBL2_int_str7_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==7)&&(tTopo->tibModule(iidd)==2))hresTIBL2_int_str7_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==7)&&(tTopo->tibModule(iidd)==3))hresTIBL2_int_str7_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==8)&&(tTopo->tibModule(iidd)==1))hresTIBL2_int_str8_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==8)&&(tTopo->tibModule(iidd)==2))hresTIBL2_int_str8_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==8)&&(tTopo->tibModule(iidd)==3))hresTIBL2_int_str8_mod3->Fill(xres);
 	}
-	if(tibid.string()[1]==1){
-	  if((tibid.string()[2]==1)&&(tibid.module()==1))hresTIBL2_est_str1_mod1->Fill(xres);
-	  if((tibid.string()[2]==1)&&(tibid.module()==2))hresTIBL2_est_str1_mod2->Fill(xres);
-	  if((tibid.string()[2]==1)&&(tibid.module()==3))hresTIBL2_est_str1_mod3->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==1))hresTIBL2_est_str2_mod1->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==2))hresTIBL2_est_str2_mod2->Fill(xres);
-	  if((tibid.string()[2]==2)&&(tibid.module()==3))hresTIBL2_est_str2_mod3->Fill(xres);
-	  if((tibid.string()[2]==3)&&(tibid.module()==1))hresTIBL2_est_str3_mod1->Fill(xres);
-	  if((tibid.string()[2]==3)&&(tibid.module()==2))hresTIBL2_est_str3_mod2->Fill(xres);
-	  if((tibid.string()[2]==3)&&(tibid.module()==3))hresTIBL2_est_str3_mod3->Fill(xres);
-	  if((tibid.string()[2]==4)&&(tibid.module()==1))hresTIBL2_est_str4_mod1->Fill(xres);
-	  if((tibid.string()[2]==4)&&(tibid.module()==2))hresTIBL2_est_str4_mod2->Fill(xres);
-	  if((tibid.string()[2]==4)&&(tibid.module()==3))hresTIBL2_est_str4_mod3->Fill(xres);
-	  if((tibid.string()[2]==5)&&(tibid.module()==1))hresTIBL2_est_str5_mod1->Fill(xres);
-	  if((tibid.string()[2]==5)&&(tibid.module()==2))hresTIBL2_est_str5_mod2->Fill(xres);
-	  if((tibid.string()[2]==5)&&(tibid.module()==3))hresTIBL2_est_str5_mod3->Fill(xres);
-	  if((tibid.string()[2]==6)&&(tibid.module()==1))hresTIBL2_est_str6_mod1->Fill(xres);
-	  if((tibid.string()[2]==6)&&(tibid.module()==2))hresTIBL2_est_str6_mod2->Fill(xres);
-	  if((tibid.string()[2]==6)&&(tibid.module()==3))hresTIBL2_est_str6_mod3->Fill(xres);
-	  if((tibid.string()[2]==7)&&(tibid.module()==1))hresTIBL2_est_str7_mod1->Fill(xres);
-	  if((tibid.string()[2]==7)&&(tibid.module()==2))hresTIBL2_est_str7_mod2->Fill(xres);
-	  if((tibid.string()[2]==7)&&(tibid.module()==3))hresTIBL2_est_str7_mod3->Fill(xres);
+	if(tTopo->tibStringInfo(iidd)[1]==1){
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==1))hresTIBL2_est_str1_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==2))hresTIBL2_est_str1_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==1)&&(tTopo->tibModule(iidd)==3))hresTIBL2_est_str1_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==1))hresTIBL2_est_str2_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==2))hresTIBL2_est_str2_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==2)&&(tTopo->tibModule(iidd)==3))hresTIBL2_est_str2_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==3)&&(tTopo->tibModule(iidd)==1))hresTIBL2_est_str3_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==3)&&(tTopo->tibModule(iidd)==2))hresTIBL2_est_str3_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==3)&&(tTopo->tibModule(iidd)==3))hresTIBL2_est_str3_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==4)&&(tTopo->tibModule(iidd)==1))hresTIBL2_est_str4_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==4)&&(tTopo->tibModule(iidd)==2))hresTIBL2_est_str4_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==4)&&(tTopo->tibModule(iidd)==3))hresTIBL2_est_str4_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==5)&&(tTopo->tibModule(iidd)==1))hresTIBL2_est_str5_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==5)&&(tTopo->tibModule(iidd)==2))hresTIBL2_est_str5_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==5)&&(tTopo->tibModule(iidd)==3))hresTIBL2_est_str5_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==6)&&(tTopo->tibModule(iidd)==1))hresTIBL2_est_str6_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==6)&&(tTopo->tibModule(iidd)==2))hresTIBL2_est_str6_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==6)&&(tTopo->tibModule(iidd)==3))hresTIBL2_est_str6_mod3->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==7)&&(tTopo->tibModule(iidd)==1))hresTIBL2_est_str7_mod1->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==7)&&(tTopo->tibModule(iidd)==2))hresTIBL2_est_str7_mod2->Fill(xres);
+	  if((tTopo->tibStringInfo(iidd)[2]==7)&&(tTopo->tibModule(iidd)==3))hresTIBL2_est_str7_mod3->Fill(xres);
 	}
       }
     }
   
     //TOB
     if (sub==5){
-      TOBDetId tobid(iidd); 
   
-      if(tobid.layer()==1){
-	if((tobid.rod()[1]==1)&&(tobid.module()==1))hresTOBL1_rod1_mod1->Fill(xres);
-	if((tobid.rod()[1]==1)&&(tobid.module()==2))hresTOBL1_rod1_mod2->Fill(xres);
-	if((tobid.rod()[1]==1)&&(tobid.module()==3))hresTOBL1_rod1_mod3->Fill(xres);
-	if((tobid.rod()[1]==1)&&(tobid.module()==4))hresTOBL1_rod1_mod4->Fill(xres);
-	if((tobid.rod()[1]==1)&&(tobid.module()==5))hresTOBL1_rod1_mod5->Fill(xres);
-	if((tobid.rod()[1]==1)&&(tobid.module()==6))hresTOBL1_rod1_mod6->Fill(xres);
-	if((tobid.rod()[1]==2)&&(tobid.module()==1))hresTOBL1_rod2_mod1->Fill(xres);
-	if((tobid.rod()[1]==2)&&(tobid.module()==2))hresTOBL1_rod2_mod2->Fill(xres);
-	if((tobid.rod()[1]==2)&&(tobid.module()==3))hresTOBL1_rod2_mod3->Fill(xres);
-	if((tobid.rod()[1]==2)&&(tobid.module()==4))hresTOBL1_rod2_mod4->Fill(xres);
-	if((tobid.rod()[1]==2)&&(tobid.module()==5))hresTOBL1_rod2_mod5->Fill(xres);
-	if((tobid.rod()[1]==2)&&(tobid.module()==6))hresTOBL1_rod2_mod6->Fill(xres);
+  
+      if(tTopo->tobLayer(iidd)==1){
+	if((tTopo->tobRodInfo(iidd)[1]==1)&&(tTopo->tobModule(iidd)==1))hresTOBL1_rod1_mod1->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==1)&&(tTopo->tobModule(iidd)==2))hresTOBL1_rod1_mod2->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==1)&&(tTopo->tobModule(iidd)==3))hresTOBL1_rod1_mod3->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==1)&&(tTopo->tobModule(iidd)==4))hresTOBL1_rod1_mod4->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==1)&&(tTopo->tobModule(iidd)==5))hresTOBL1_rod1_mod5->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==1)&&(tTopo->tobModule(iidd)==6))hresTOBL1_rod1_mod6->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==2)&&(tTopo->tobModule(iidd)==1))hresTOBL1_rod2_mod1->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==2)&&(tTopo->tobModule(iidd)==2))hresTOBL1_rod2_mod2->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==2)&&(tTopo->tobModule(iidd)==3))hresTOBL1_rod2_mod3->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==2)&&(tTopo->tobModule(iidd)==4))hresTOBL1_rod2_mod4->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==2)&&(tTopo->tobModule(iidd)==5))hresTOBL1_rod2_mod5->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==2)&&(tTopo->tobModule(iidd)==6))hresTOBL1_rod2_mod6->Fill(xres);
       }
-      if(tobid.layer()==2){
-	if((tobid.rod()[1]==1)&&(tobid.module()==1))hresTOBL2_rod1_mod1->Fill(xres);
-	if((tobid.rod()[1]==1)&&(tobid.module()==2))hresTOBL2_rod1_mod2->Fill(xres);
-	if((tobid.rod()[1]==1)&&(tobid.module()==3))hresTOBL2_rod1_mod3->Fill(xres);
- 	if((tobid.rod()[1]==1)&&(tobid.module()==4))hresTOBL2_rod1_mod4->Fill(xres);
- 	if((tobid.rod()[1]==1)&&(tobid.module()==5))hresTOBL2_rod1_mod5->Fill(xres);
- 	if((tobid.rod()[1]==1)&&(tobid.module()==6))hresTOBL2_rod1_mod6->Fill(xres);
-	if((tobid.rod()[1]==2)&&(tobid.module()==1))hresTOBL2_rod2_mod1->Fill(xres);
-	if((tobid.rod()[1]==2)&&(tobid.module()==2))hresTOBL2_rod2_mod2->Fill(xres);
-	if((tobid.rod()[1]==2)&&(tobid.module()==3))hresTOBL2_rod2_mod3->Fill(xres);
- 	if((tobid.rod()[1]==2)&&(tobid.module()==4))hresTOBL2_rod2_mod4->Fill(xres);
- 	if((tobid.rod()[1]==2)&&(tobid.module()==5))hresTOBL2_rod2_mod5->Fill(xres);
- 	if((tobid.rod()[1]==2)&&(tobid.module()==6))hresTOBL2_rod2_mod6->Fill(xres);
+      if(tTopo->tobLayer(iidd)==2){
+	if((tTopo->tobRodInfo(iidd)[1]==1)&&(tTopo->tobModule(iidd)==1))hresTOBL2_rod1_mod1->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==1)&&(tTopo->tobModule(iidd)==2))hresTOBL2_rod1_mod2->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==1)&&(tTopo->tobModule(iidd)==3))hresTOBL2_rod1_mod3->Fill(xres);
+ 	if((tTopo->tobRodInfo(iidd)[1]==1)&&(tTopo->tobModule(iidd)==4))hresTOBL2_rod1_mod4->Fill(xres);
+ 	if((tTopo->tobRodInfo(iidd)[1]==1)&&(tTopo->tobModule(iidd)==5))hresTOBL2_rod1_mod5->Fill(xres);
+ 	if((tTopo->tobRodInfo(iidd)[1]==1)&&(tTopo->tobModule(iidd)==6))hresTOBL2_rod1_mod6->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==2)&&(tTopo->tobModule(iidd)==1))hresTOBL2_rod2_mod1->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==2)&&(tTopo->tobModule(iidd)==2))hresTOBL2_rod2_mod2->Fill(xres);
+	if((tTopo->tobRodInfo(iidd)[1]==2)&&(tTopo->tobModule(iidd)==3))hresTOBL2_rod2_mod3->Fill(xres);
+ 	if((tTopo->tobRodInfo(iidd)[1]==2)&&(tTopo->tobModule(iidd)==4))hresTOBL2_rod2_mod4->Fill(xres);
+ 	if((tTopo->tobRodInfo(iidd)[1]==2)&&(tTopo->tobModule(iidd)==5))hresTOBL2_rod2_mod5->Fill(xres);
+ 	if((tTopo->tobRodInfo(iidd)[1]==2)&&(tTopo->tobModule(iidd)==6))hresTOBL2_rod2_mod6->Fill(xres);
       }
     }
     

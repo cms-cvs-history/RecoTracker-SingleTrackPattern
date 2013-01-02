@@ -1,9 +1,7 @@
 #include "RecoTracker/SingleTrackPattern/test/LayerFilter.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TECDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/IdealGeometryRecord.h"
 
 LayerFilter::LayerFilter(const edm::ParameterSet& conf): conf_(conf){
 	produces< edm::DetSetVector<SiStripCluster> > ();
@@ -21,6 +19,11 @@ void LayerFilter::beginRun(edm::Run & run, const edm::EventSetup& es){
 }
 
 void LayerFilter::produce(edm::Event& e, const edm::EventSetup& c){
+  //Retrieve tracker topology from geometry
+  edm::ESHandle<TrackerTopology> tTopo;
+  c.get<IdealGeometryRecord>().get(tTopo);
+
+
 	//get inputs
 	std::string stripClusterProducer = conf_.getParameter<std::string>("ClusterProducer");
    	edm::Handle<edm::DetSetVector<SiStripCluster> > clusterHandle;
@@ -48,11 +51,11 @@ void LayerFilter::produce(edm::Event& e, const edm::EventSetup& c){
 		int tiblayer =0;
 		unsigned int TKlayers = 0;
 		if (a.subdetId() == 3 ) {
-		  tiblayer = TIBDetId(detId).layer();
+		  tiblayer = tTopo->tibLayer(detId);
 		  TKlayers = tiblayer;
 		}
 		if (a.subdetId() == 5 ) {
-		  toblayer = TOBDetId(detId).layer();
+		  toblayer = tTopo->tobLayer(detId);
 		  TKlayers = toblayer + 4;
 		}
 		
