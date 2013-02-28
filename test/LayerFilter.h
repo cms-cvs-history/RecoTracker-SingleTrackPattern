@@ -30,9 +30,9 @@ class LayerFilter : public edm::EDProducer
 
 	virtual ~LayerFilter();
 
-    	virtual void beginRun(edm::Run & run, const edm::EventSetup& );
+    	virtual void beginRun(const edm::Run & run, const edm::EventSetup& ) override;
 
-    	virtual void produce(edm::Event& e, const edm::EventSetup& c);
+    	virtual void produce(edm::Event& e, const edm::EventSetup& c) override;
 
 	private:
 	unsigned int layers;

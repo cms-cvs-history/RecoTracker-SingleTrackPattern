@@ -10,7 +10,7 @@ LayerFilter::LayerFilter(const edm::ParameterSet& conf): conf_(conf){
 
 LayerFilter::~LayerFilter(){}
 
-void LayerFilter::beginRun(edm::Run & run, const edm::EventSetup& es){
+void LayerFilter::beginRun(const edm::Run & run, const edm::EventSetup& es){
   ContTIB3Lay = 0;
   ContTIB3Mod = 0;
   ContTIB3Fil1 = 0;
